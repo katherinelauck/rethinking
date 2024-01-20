@@ -2,6 +2,8 @@
 ##
 
 library(rethinking)
+
+data("Howell1");d <- Howell1; d2 <- d[d$age >= 18,]
 set.seed(2971)
 N <- 100
 a <- rnorm(N,178,20)
@@ -82,3 +84,133 @@ plot(height ~ weight, d2, type = "n")
 for(i in 1:1000) {
   points(weight.seq,mu[i,],pch = 16, col = col.alpha(rangi2,0.1))
 }
+mu.mean <- apply(mu,2,mean)
+mu.PI <- apply(mu,2,PI,prob = .89)
+mu.HPDI <- apply(mu,2,HPDI,prob = .89)
+
+sim.height <- sim(m4.3, data = list(weight = weight.seq),n = 1e4)
+height.PI <- apply(sim.height,2,PI,prob= .89)
+
+plot(height ~ weight, data = d2, col = col.alpha(rangi2,.5))
+lines(weight.seq,mu.mean)
+shade(mu.HPDI,weight.seq)
+shade(height.PI,weight.seq)
+
+plot(height ~ weight, d)
+
+d$weight_s <- (d$weight - mean(d$weight))/sd(d$weight)
+d$weight_s2 <- d$weight_s^2
+
+m4.5 <- quap(
+  alist(
+    height ~ dnorm(mu,sigma),
+    mu <- a + b1 * weight_s + b2 * weight_s2,
+    a ~ dnorm(178,20),
+    b1 ~ dlnorm(0,1),
+    b2 ~ dnorm(0,1),
+    sigma ~ dunif(0,50)),
+  data = d)
+
+precis(m4.5)
+
+weight.seq <- seq( from=-2.2 , to=2 , length.out=30 )
+pred_dat <- list( weight_s=weight.seq , weight_s2=weight.seq^2 )
+mu <- link( m4.5 , data=pred_dat )
+mu.mean <- apply( mu , 2 , mean )
+mu.PI <- apply( mu , 2 , PI , prob=0.89 )
+sim.height <- sim( m4.5 , data=pred_dat )
+height.PI <- apply( sim.height , 2 , PI , prob=0.89 )
+
+plot( height ~ weight_s , d , col=col.alpha(rangi2,0.5) )
+lines( weight.seq , mu.mean )
+shade( mu.PI , weight.seq )
+shade( height.PI , weight.seq )
+
+d$weight_s <- (d$weight - mean(d$weight))/sd(d$weight)
+d$weight_s2 <- d$weight_s^2
+d$weight_s3 <- d$weight_s^3
+
+m4.6 <- quap(
+  alist(
+    height ~ dnorm(mu,sigma),
+    mu <- a + b1 * weight_s + b2 * weight_s2 + b3 * weight_s3,
+    a ~ dnorm(178,20),
+    b1 ~ dlnorm(0,1),
+    b2 ~ dnorm(0,1),
+    b3 ~ dnorm(0,1),
+    sigma ~ dunif(0,50)),
+  data = d)
+
+precis(m4.6)
+
+weight.seq <- seq( from=-2.2 , to=2 , length.out=30 )
+pred_dat <- list( weight_s=weight.seq , weight_s2=weight.seq^2 , weight_s3 = weight.seq^3)
+mu <- link( m4.6 , data=pred_dat )
+mu.mean <- apply( mu , 2 , mean )
+mu.PI <- apply( mu , 2 , PI , prob=0.89 )
+sim.height <- sim( m4.6 , data=pred_dat )
+height.PI <- apply( sim.height , 2 , PI , prob=0.89 )
+
+plot( height ~ weight_s , d , col=col.alpha(rangi2,0.5) )
+lines( weight.seq , mu.mean )
+shade( mu.PI , weight.seq )
+shade( height.PI , weight.seq )
+
+data("cherry_blossoms")
+d <- cherry_blossoms
+precis(d)
+plot(doy~year,data = d)
+
+d2 <- d[ complete.cases(d$doy) , ]
+num_knots <- 15
+knot_list <- quantile( d2$year , probs=seq(0,1,length.out=num_knots) )
+
+knot_list
+
+library(splines)
+B <- bs(d2$year,
+        knots=knot_list[-c(1,num_knots)] ,
+        degree=3 , intercept=TRUE )
+
+plot( NULL , xlim=range(d2$year) , ylim=c(0,1) , xlab="year" , ylab="basis" )
+for ( i in 1:ncol(B) ) lines( d2$year , B[,i] )
+
+m4.7 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + B %*% w ,
+    a ~ dnorm(100,10),
+    w ~ dnorm(0,10),
+    sigma ~ dexp(1)),
+  data=list( D=d2$doy , B=B ) ,
+  start=list( w=rep( 0 , ncol(B) ) ) )
+
+post <- extract.samples( m4.7 )
+w <- apply( post$w , 2 , mean )
+plot( NULL , xlim=range(d2$year) , ylim=c(-6,6) ,
+      xlab="year" , ylab="basis * weight" )
+for ( i in 1:ncol(B) ) lines( d2$year , w[i]*B[,i] )
+
+mu <- link( m4.7 )
+mu_mean <- apply(mu,2,mean)
+mu_PI <- apply(mu,2,PI,0.97)
+plot( d2$year , d2$doy , col=col.alpha(rangi2,0.3) , pch=16)
+shade( mu_PI , d2$year , col=col.alpha("black",0.5) )
+lines(d2$year,mu_mean)
+
+set.seed(2728)
+N <- 1000
+mu <- rnorm(N, 0,10)
+sigma <- rexp(N,1)
+
+y <- rnorm(N,mean = mu,sd = sigma)
+
+m4m2 <- quap(
+  alist(
+    y ~ dnorm(mu,sigma),
+    mu ~ dnorm(0,10),
+    sigma ~ dexp(1)))
+
+## 4m4
+
+
