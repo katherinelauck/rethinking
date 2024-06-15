@@ -2,425 +2,154 @@
 ##
 
 library(rethinking)
-
-data("Howell1");d <- Howell1; d2 <- d[d$age >= 18,]
-set.seed(2971)
-N <- 100
-a <- rnorm(N,178,20)
-b <- rlnorm(N,0,1)
-
-plot(NULL,xlim= range(d2$weight),ylim = c(-100,400),
-     xlab = "weight",ylab = "height")
-abline(h = 0,lty = 2)
-abline(h = 272,lty = 1, lwd = .5)
-
-mtext("b-dnorm(0,10)")
-
-xbar <- mean(d2$weight)
-for(i in 1:N) {
-  curve(a[i] + b[i] * (x - xbar),
-        from = min(d2$weight),
-        to = max(d2$weight),
-        add = TRUE,
-        col = col.alpha("black",.2))
-}
-
-
-m4.3 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b*(weight - xbar),
-    a ~ dnorm(178,20),
-    b ~ dlnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = d2
-  )
-
-post <- extract.samples(m4.3)
-post[1:5,]
-
-plot( height ~ weight , data=d2 , col = rangi2)
-a_map <- mean(post$a)
-b_map <- mean(post$b)
-curve(a_map + b_map*(x-xbar),add = TRUE)
-
-N <- 200
-dN <- d2[1:N,]
-mN <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b*(weight - mean(weight)),
-    a ~ dnorm(178,20),
-    b ~ dlnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = dN
-)
-
-post <- extract.samples(mN,n = 20)
-plot( dN$weight , dN$height ,
-      xlim=range(d2$weight) , ylim=range(d2$height) ,
-      col=rangi2 , xlab="weight", ylab="height")
-
-mtext(concat("N = ",N))
-
-for(i in 1:nrow(post)) {
-  curve(post$a[i] + post$b[i] * (x - mean(dN$weight)),
-        col = col.alpha("black",.3),add = TRUE)
-}
-
-
-post <- extract.samples(m4.3)
-mu_at_50 <- post$a + post$b * (50-xbar)
-dens(mu_at_50,col = rangi2,lwd = 2, xlab = "mu|weight=50")
-PI(mu_at_50,prob = .89)
-mu <- link(m4.3)
-str(mu)
-
-
-weight.seq <- seq(from = 25,to = 70,by = 1)
-mu <- link(m4.3,data = data.frame(weight = weight.seq))
-str(mu)
-plot(height ~ weight, d2, type = "n")
-for(i in 1:1000) {
-  points(weight.seq,mu[i,],pch = 16, col = col.alpha(rangi2,0.1))
-}
-mu.mean <- apply(mu,2,mean)
-mu.PI <- apply(mu,2,PI,prob = .89)
-mu.HPDI <- apply(mu,2,HPDI,prob = .89)
-
-sim.height <- sim(m4.3, data = list(weight = weight.seq),n = 1e4)
-height.PI <- apply(sim.height,2,PI,prob= .89)
-
-plot(height ~ weight, data = d2, col = col.alpha(rangi2,.5))
-lines(weight.seq,mu.mean)
-shade(mu.HPDI,weight.seq)
-shade(height.PI,weight.seq)
-
-plot(height ~ weight, d)
-
-d$weight_s <- (d$weight - mean(d$weight))/sd(d$weight)
-d$weight_s2 <- d$weight_s^2
-
-m4.5 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b1 * weight_s + b2 * weight_s2,
-    a ~ dnorm(178,20),
-    b1 ~ dlnorm(0,1),
-    b2 ~ dnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = d)
-
-precis(m4.5)
-
-weight.seq <- seq( from=-2.2 , to=2 , length.out=30 )
-pred_dat <- list( weight_s=weight.seq , weight_s2=weight.seq^2 )
-mu <- link( m4.5 , data=pred_dat )
-mu.mean <- apply( mu , 2 , mean )
-mu.PI <- apply( mu , 2 , PI , prob=0.89 )
-sim.height <- sim( m4.5 , data=pred_dat )
-height.PI <- apply( sim.height , 2 , PI , prob=0.89 )
-
-plot( height ~ weight_s , d , col=col.alpha(rangi2,0.5) )
-lines( weight.seq , mu.mean )
-shade( mu.PI , weight.seq )
-shade( height.PI , weight.seq )
-
-d$weight_s <- (d$weight - mean(d$weight))/sd(d$weight)
-d$weight_s2 <- d$weight_s^2
-d$weight_s3 <- d$weight_s^3
-
-m4.6 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b1 * weight_s + b2 * weight_s2 + b3 * weight_s3,
-    a ~ dnorm(178,20),
-    b1 ~ dlnorm(0,1),
-    b2 ~ dnorm(0,1),
-    b3 ~ dnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = d)
-
-precis(m4.6)
-
-weight.seq <- seq( from=-2.2 , to=2 , length.out=30 )
-pred_dat <- list( weight_s=weight.seq , weight_s2=weight.seq^2 , weight_s3 = weight.seq^3)
-mu <- link( m4.6 , data=pred_dat )
-mu.mean <- apply( mu , 2 , mean )
-mu.PI <- apply( mu , 2 , PI , prob=0.89 )
-sim.height <- sim( m4.6 , data=pred_dat )
-height.PI <- apply( sim.height , 2 , PI , prob=0.89 )
-
-plot( height ~ weight_s , d , col=col.alpha(rangi2,0.5) )
-lines( weight.seq , mu.mean )
-shade( mu.PI , weight.seq )
-shade( height.PI , weight.seq )
-
-data("cherry_blossoms")
-d <- cherry_blossoms
-precis(d)
-plot(doy~year,data = d)
-
-d2 <- d[ complete.cases(d$doy) , ]
-num_knots <- 15
-knot_list <- quantile( d2$year , probs=seq(0,1,length.out=num_knots) )
-
-knot_list
-
-library(splines)
-B <- bs(d2$year,
-        knots=knot_list[-c(1,num_knots)] ,
-        degree=3 , intercept=TRUE )
-
-plot( NULL , xlim=range(d2$year) , ylim=c(0,1) , xlab="year" , ylab="basis" )
-for ( i in 1:ncol(B) ) lines( d2$year , B[,i] )
-
-m4.7 <- quap(
-  alist(
-    D ~ dnorm( mu , sigma ) ,
-    mu <- a + B %*% w ,
-    a ~ dnorm(100,10),
-    w ~ dnorm(0,10),
-    sigma ~ dexp(1)),
-  data=list( D=d2$doy , B=B ) ,
-  start=list( w=rep( 0 , ncol(B) ) ) )
-
-post <- extract.samples( m4.7 )
-w <- apply( post$w , 2 , mean )
-plot( NULL , xlim=range(d2$year) , ylim=c(-6,6) ,
-      xlab="year" , ylab="basis * weight" )
-for ( i in 1:ncol(B) ) lines( d2$year , w[i]*B[,i] )
-
-mu <- link( m4.7 )
-mu_mean <- apply(mu,2,mean)
-mu_PI <- apply(mu,2,PI,0.97)
-plot( d2$year , d2$doy , col=col.alpha(rangi2,0.3) , pch=16)
-shade( mu_PI , d2$year , col=col.alpha("black",0.5) )
-lines(d2$year,mu_mean)
-
-set.seed(2728)
-N <- 1000
-mu <- rnorm(N, 0,10)
-sigma <- rexp(N,1)
-
-y <- rnorm(N,mean = mu,sd = sigma)
-
-# m4m2 <- quap(
-#   alist(
-#     y ~ dnorm(mu,sigma),
-#     mu ~ dnorm(0,10),
-#     sigma ~ dexp(1)))
-
-## 4m4
-
-data("cherry_blossoms")
-d <- cherry_blossoms
-precis(d)
-plot(doy~year,data = d)
-
-d2 <- d[ complete.cases(d$doy) , ]
-num_knots <- 30
-knot_list <- quantile( d2$year , probs=seq(0,1,length.out=num_knots) )
-
-knot_list
-
-library(splines)
-B <- bs(d2$year,
-        knots=knot_list[-c(1,num_knots)] ,
-        degree=3 , intercept=TRUE )
-
-plot( NULL , xlim=range(d2$year) , ylim=c(0,1) , xlab="year" , ylab="basis" )
-for ( i in 1:ncol(B) ) lines( d2$year , B[,i] )
-
-m4.7 <- quap(
-  alist(
-    D ~ dnorm( mu , sigma ) ,
-    mu <- a + B %*% w ,
-    a ~ dnorm(100,10),
-    w ~ dnorm(0,10),
-    sigma ~ dexp(1)),
-  data=list( D=d2$doy , B=B ) ,
-  start=list( w=rep( 0 , ncol(B) ) ) )
-
-post <- extract.samples( m4.7 )
-w <- apply( post$w , 2 , mean )
-plot( NULL , xlim=range(d2$year) , ylim=c(-6,6) ,
-      xlab="year" , ylab="basis * weight" )
-for ( i in 1:ncol(B) ) lines( d2$year , w[i]*B[,i] )
-
-mu <- link( m4.7 )
-mu_mean <- apply(mu,2,mean)
-mu_PI <- apply(mu,2,PI,0.97)
-plot( d2$year , d2$doy , col=col.alpha(rangi2,0.3) , pch=16)
-shade( mu_PI , d2$year , col=col.alpha("black",0.5) )
-lines(d2$year,mu_mean)
-
-library(rethinking)
-
-data("Howell1");d <- Howell1; d2 <- d[d$age >= 18,]
-set.seed(2971)
-N <- 100
-a <- rnorm(N,178,20)
-b <- rlnorm(N,0,1)
-
-plot(NULL,xlim= range(d2$weight),ylim = c(-100,400),
-     xlab = "weight",ylab = "height")
-abline(h = 0,lty = 2)
-abline(h = 272,lty = 1, lwd = .5)
-
-mtext("b-dnorm(0,10)")
-
-xbar <- mean(d2$weight)
-for(i in 1:N) {
-  curve(a[i] + b[i] * (x - xbar),
-        from = min(d2$weight),
-        to = max(d2$weight),
-        add = TRUE,
-        col = col.alpha("black",.2))
-}
-
-
-m4.3 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b*(weight),
-    a ~ dnorm(178,20),
-    b ~ dlnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = d2
-)
-
-post <- extract.samples(m4.3)
-post[1:5,]
-
-plot( height ~ weight , data=d2 , col = rangi2)
-a_map <- mean(post$a)
-b_map <- mean(post$b)
-curve(a_map + b_map*(x),add = TRUE)
-precis(m4.3)
-cov2cor(vcov(m4.3))
-
-## 4H1
-
-d$weight_s <- (d$weight - mean(d$weight))/sd(d$weight)
-d$weight_s2 <- d$weight_s^2
-d$weight_s3 <- d$weight_s^3
-
-m4.6 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b1 * weight_s + b2 * weight_s2 + b3 * weight_s3,
-    a ~ dnorm(178,20),
-    b1 ~ dlnorm(0,1),
-    b2 ~ dnorm(0,1),
-    b3 ~ dnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = d)
-
-precis(m4.6)
-
-pred_w_s <- (c(46.95,43.72,64.78,32.59,54.63) - mean(d$weight))/sd(d$weight)
-
-weight.seq <- seq( from=-2.2 , to=2 , length.out=30 )
-
-pred_dat <- list( weight_s=pred_w_s , weight_s2=pred_w_s^2 , weight_s3 = pred_w_s^3)
-mu <- link( m4.6 , data=pred_dat )
-mu.mean <- apply( mu , 2 , mean )
-mu.PI <- apply( mu , 2 , PI , prob=0.89 )
-sim.height <- sim( m4.6 , data=pred_dat )
-height.PI <- apply( sim.height , 2 , PI , prob=0.89 )
-
-mu.mean
-height.PI
-
-## 4H2
-
-d2 <- d[d$age < 18,]
-
-xbar <- mean(d2$weight)
-
-m4.3 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b*(weight - xbar),
-    a ~ dnorm(178,20),
-    b ~ dlnorm(0,1),
-    sigma ~ dunif(0,50)),
-  data = d2
-)
-
-precis(m4.3)
-
-plot( height ~ weight , data=d2 , col = rangi2)
-
-weight.seq <- seq(from = min(d2$weight),to = max(d2$weight),by = 1)
-mu <- link(m4.3,data = data.frame(weight = weight.seq))
-mu.mean <- apply(mu,2,mean)
-mu.PI <- apply(mu,2,PI,prob = .89)
-mu.HPDI <- apply(mu,2,HPDI,prob = .89)
-
-sim.height <- sim(m4.3, data = list(weight = weight.seq),n = 1e4)
-height.PI <- apply(sim.height,2,PI,prob= .89)
-
-plot(height ~ weight, data = d2, col = col.alpha(rangi2,.5))
-lines(weight.seq,mu.mean)
-shade(mu.HPDI,weight.seq)
-shade(height.PI,weight.seq)
-
-### I think a better model would allow the curve to change slope at different weights, assuming that children of different ages will grow at different rates. Would be nice to have an age predictor to relate this change to biologically meaningful infomation.
-
-## 4H3
-
-xbar <- mean(d$weight)
-
-m4.3 <- quap(
-  alist(
-    height ~ dnorm(mu,sigma),
-    mu <- a + b*(log(weight)-log(xbar)),
-    a ~ dnorm(178,20),
-    b ~ dlnorm(4,.7),
-    sigma ~ dunif(0,20)),
-  data = d
-)
-
-
-
-precis(m4.3)
-
-plot( height ~ weight , data=d , col = rangi2)
-
-weight.seq <- seq(from = min(d$weight),to = max(d$weight),by = 1)
-mu <- link(m4.3,data = data.frame(weight = weight.seq))
-mu.mean <- apply(mu,2,mean)
-mu.PI <- apply(mu,2,PI,prob = .89)
-mu.HPDI <- apply(mu,2,HPDI,prob = .89)
-
-sim.height <- sim(m4.3, data = list(weight = weight.seq),n = 1e4)
-height.PI <- apply(sim.height,2,PI,prob= .89)
-
-plot(height ~ weight, data = d, col = col.alpha(rangi2,.5))
-lines(weight.seq,mu.mean)
-shade(mu.HPDI,weight.seq)
-shade(height.PI,weight.seq)
-
-set.seed(2971)
-N <- 100
-a <- rnorm(N,178,20)
-b <- rlnorm(N,4,.7)
-
-plot(NULL,xlim= range(d$weight),ylim = c(-100,400),
-     xlab = "weight",ylab = "height")
-abline(h = 0,lty = 2)
-abline(h = 272,lty = 1, lwd = .5)
-
-mtext("b-dlnorm(0,.5)")
-
-xbar <- mean(d$weight)
-for(i in 1:N) {
-  curve(a[i] + b[i] * (log(x) - log(xbar)),
-        from = min(d$weight),
-        to = max(d$weight),
-        add = TRUE,
-        col = col.alpha("black",.2))
-}
-
+library(tidyverse)
+
+p.grid <- seq(from = 0, to = 1, length.out = 1000)
+prob_p <- rep(1,1000)
+prob_data <- dbinom(6, size = 9, prob = p.grid)
+posterior <- prob_data * prob_p
+posterior <- posterior/sum(posterior)
+
+samples <- sample(p.grid, prob = posterior, size = 1e4, replace = TRUE)
+plot(samples)
+dens(samples)
+sum(samples<.5)/1e4
+
+quantile(samples,.8)
+HPDI(samples,.5)
+
+sum(posterior * abs(.5 - p.grid))
+loss <- sapply(p.grid,function(d) sum(posterior * abs(d - p.grid)))
+p.grid[which.min(loss)]
+
+dbinom(0:2,size = 2, prob = .7)
+dummy_w <- rbinom(1e5, size = 2, prob = .7)
+table(dummy_w)/1e5
+
+dummy_w <- rbinom(1e5, size = 20, prob = .7)
+hist(dummy_w/20,xlab = "dummy water prop")
+
+dummy_w <- rbinom(1e3, size = 9, prob = .7)
+hist(dummy_w/9,xlab = "dummy water prop")
+
+dummy_w <- rbinom(1000, size = 15, prob = .5)
+simplehist(dummy_w,xlab = "dummy water count")
+
+
+# Easy questions:
+
+p_grid <- seq(from = 0, to = 1, length.out = 1000)
+prior <- rep (1,1000)
+likelihood <- dbinom(6, size = 9, prob = p_grid)
+posterior <- likelihood * prior
+posterior <- posterior/sum(posterior)
+set.seed(100)
+samples <- sample(p_grid,prob = posterior, size = 1e4, replace = TRUE)
+
+# 3E1.
+sum(samples < .2)/1e4
+# 3E2.
+sum(samples > .8)/1e4
+# 3E3.
+sum(samples > .2 & samples < .8)/1e4
+# 3E4.
+quantile(samples, .2)
+# 3E5.
+quantile(samples, .8)
+# 3E6.
+HPDI(samples, prob = .66)
+# 3E7.
+quantile(samples,(1-.66)/2)
+quantile(samples, 1- ((1-.66)/2))
+
+# 3M1.
+p_grid <- seq(from = 0, to = 1, length.out = 1000)
+prior <- rep (1,1000)
+likelihood <- dbinom(8, size = 15, prob = p_grid)
+posterior <- likelihood * prior
+posterior <- posterior/sum(posterior)
+# 3M2.
+set.seed(100)
+samples <- sample(p_grid,prob = posterior, size = 1e4, replace = TRUE)
+HPDI(samples,prob = .9)
+# 3M3.
+w <- rbinom(1e4,size = 15, prob = samples)
+sum(w == 8)/1e4
+# 3M4.
+w <- rbinom(1e4,size = 9, prob = samples)
+sum(w == 6)/1e4
+# 3M5.
+# new prior
+p_grid <- seq(from = 0, to = 1, length.out = 1000)
+prior <- if_else(p_grid < 0.5, 0, 1)
+likelihood <- dbinom(8, size = 15, prob = p_grid)
+posterior <- likelihood * prior
+posterior <- posterior/sum(posterior)
+set.seed(100)
+samples <- sample(p_grid,prob = posterior, size = 1e4, replace = TRUE)
+HPDI(samples,prob = .9)
+# with prior
+w <- rbinom(1e4,size = 15, prob = samples)
+sum(w == 8)/1e4
+
+
+# old prior
+p_grid <- seq(from = 0, to = 1, length.out = 1000)
+prior <- rep (1,1000)
+likelihood <- dbinom(8, size = 15, prob = p_grid)
+posterior <- likelihood * prior
+posterior <- posterior/sum(posterior)
+set.seed(100)
+samples <- sample(p_grid,prob = posterior, size = 1e4, replace = TRUE)
+HPDI(samples,prob = .9)
+w <- rbinom(1e4,size = 15, prob = samples)
+sum(w == 8)/1e4
+
+# compare to true value
+w <- rbinom(1e4,size = 15, prob = .7)
+sum(w == 8)/1e4
+
+# 3M6.
+size <- seq(from = 2500, to = 2700,by = 1)
+set.seed(100)
+dummy_w <- map(size, function(n) rbinom(100,size = n, prob = samples))
+p_grid <- seq(from = 0, to = 1, length.out = 1000)
+prior <- if_else(p_grid < 0.5, 0, 1)
+likelihood <- map2(dummy_w, size, \(x,y) map(x, \(x) dbinom(x,y,prob = p_grid)))
+posterior <- map(likelihood, \(x) map(x, \(x) x * prior))
+posterior <- map(posterior, \(x) map(x, \(x) x / sum(x)))
+samples_w <- map(posterior, \(x) map(x, \(x) sample(p_grid,size = 1e4, replace = TRUE, prob = x)))
+width <- map(samples_w, \(x) map(x, \(x) quantile(x,.995)-quantile(x,.005))) %>%
+  map(\(x) unlist(x) %>% HPDI() %>% t() %>% as.data.frame()) %>% list_rbind() %>%
+  mutate(size = size)
+width %>% filter(`0.89|` < 0.05)
+
+# hard problems
+data(homeworkch3)
+
+# 3H1.
+p_grid <- seq(from = 0, to = 1, length.out = 1000)
+prior <- rep (1,1000)
+likelihood <- dbinom(sum(birth1) + sum(birth2), size = length(birth1) + length(birth2), prob = p_grid)
+posterior <- likelihood * prior
+posterior <- posterior/sum(posterior)
+p_grid[which.max(posterior)]
+
+# 3H2.
+set.seed(100)
+samples <- sample(p_grid,prob = posterior, size = 1e4, replace = TRUE)
+HPDI(samples,prob = c(.5,.89,.97))
+
+# 3H3.
+b <- rbinom(1e4, size = 200, prob = samples)
+dens(b)
+
+# 3H4.
+b1 <- rbinom(1e4, size = 100, prob = samples)
+dens(b1)
+sum(birth1)
+
+# 3H5.
+b2 <- rbinom(1e4, size = sum(birth1 == 0), prob = samples)
+dens(b2)
+sum(birth2[which(birth1 == 0)])
