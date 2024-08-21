@@ -1,0 +1,60 @@
+---
+title: "ch5 practice questions"
+output: html_notebook
+---
+
+```{r setup}
+require(tidyverse)
+require(rethinking)
+```
+
+##5E2
+
+mu <- a + Blxl + Bdxd
+
+##5E3
+
+mu <- a + Bsxs + Bfxf
+
+Bs and Bf > 0
+
+##5M1
+
+Outcome: Prob of support for Kamala Harris
+Predictor 1: Earned income
+Predictor 2: Education
+
+p1 and p2 are both correlated with support for Kamala Harris, but when included in the same model, only education predicts support. Earned income does not add any more information.
+
+##5M2
+
+Outcome: nestling growth
+P1: nighttime lows
+P2: daytime highs
+
+positive correlation outcome and p1; negative correlation o and p2; positive correlation p1 and p2
+
+##5M3
+
+High divorce rate could make more ppl available for marriage, increasing marriage rate
+
+Draw 2 alternative DAGs; are they Markov equivalent? If not, what are the implied conditional independencies? Test with multiple regression.
+
+##5M4
+
+```{r}
+lds <- read_csv("../data/lds.csv")
+data("WaffleDivorce")
+d <- WaffleDivorce %>%
+  left_join(lds, by = join_by(Location == state)) %>%
+  mutate(perc_lds = str_remove(perc_lds, "%") %>% as.numeric()) %>%
+  mutate(D = standardize(Divorce), 
+         M = standardize(Marriage),
+         A = standardize(MedianAgeMarriage),
+         L = standardize(perc_lds))
+
+str(d)
+
+```
+
+
