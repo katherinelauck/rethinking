@@ -6,6 +6,7 @@ output: html_notebook
 ```{r setup}
 require(tidyverse)
 require(rethinking)
+require(dagitty)
 ```
 
 ##5E2
@@ -51,10 +52,355 @@ d <- WaffleDivorce %>%
   mutate(D = standardize(Divorce), 
          M = standardize(Marriage),
          A = standardize(MedianAgeMarriage),
-         L = standardize(perc_lds))
+         L = standardize(car::logit(perc_lds)))
 
 str(d)
 
 ```
 
+```{r}
+mL <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bA* A  + bM * M + bL*L,
+    a ~ dnorm(0,.2),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    bL ~ dnorm(0,.5),
+    sigma ~ dexp(1)),
+  data = d
+)
+precis(mL)
 
+plot(coeftab(mL), par = c("bA","bM","bL"))
+
+```
+
+##5M5
+
+g = price of gas
+e = exercise
+d = driving
+r = restaurant visits
+c = daily calorie consumption
+o = obesity
+
+o ~ dnorm(mu,sigma)
+mu = a + be * e + bg * g and
+mu = a + bg * g + bc * c
+priors
+
+So when running these two regressions in the same quap, bg should contain info about the predictor(e or c) not included in the model.
+
+```{r}
+plot(dag <- dagitty("dag{
+               gas -> driving -> exercise -> obesity
+               gas -> driving -> restaurantvisits -> calories -> obesity}"))
+
+```
+
+
+## 5H1
+
+```{r}
+plot(dag <- dagitty("dag{
+               M -> A -> D}"))
+
+impliedConditionalIndependencies(dag)
+
+```
+
+```{r}
+m5.1 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bA * A,
+    a ~ dnorm(0,.2),
+    bA ~ dnorm(0,.5),
+    sigma ~ dexp(1)),
+  data = d
+)
+
+m5.2 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bM * M,
+    a ~ dnorm(0,.2),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1)),
+  data = d
+)
+
+m5.3 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bA* A + bM * M,
+    a ~ dnorm(0,.2),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1)),
+  data = d
+)
+
+plot(coeftab(m5.1,m5.2,m5.3), par = c("bA", "bM"))
+
+```
+
+
+yes, the data are consistent with the above implied conditional independencies of the dag.
+
+##5H2
+
+```{r}
+m5.3_A <- quap(
+  alist(
+    ### A -> D
+    D ~ dnorm(mu,sigma),
+    mu <- a + bA* A,
+    a ~ dnorm(0,.2),
+    bA ~ dnorm(0,.5),
+    sigma ~ dexp(1),
+    ### M -> A
+    A ~ dnorm(mu_A,sigma_A),
+    mu_A <- aA + bMA* M,
+    aA ~ dnorm(0,.2),
+    bMA ~ dnorm(0,.5),
+    sigma_A ~ dexp(1)
+    ),
+  data = d
+)
+
+precis(m5.3_A)
+
+# With the path M -> A -> D assumed correct:
+
+M_seq <- seq(from = -2, to = 2, length.out = 30)
+
+sim_dat <- data.frame(M = M_seq)
+s <- sim(m5.3_A, data = sim_dat, vars = c("A", "D"))
+
+plot(sim_dat$M, colMeans(s$A), ylim = c(-2,2), type = "l",
+     xlab = "manipulated M",ylab = "counterfactual A")
+shade( apply(s$A, 2, PI), sim_dat$M)
+
+plot(sim_dat$M, colMeans(s$D), ylim = c(-2,2), type = "l",
+     xlab = "manipulated M",ylab = "counterfactual D")
+shade( apply(s$D, 2, PI), sim_dat$M)
+
+sim2_dat <- data.frame(M = (c(70,35) - mean(d$Marriage))/sd(d$Marriage))
+s2 <- sim(m5.3_A, dat = sim2_dat, vars = c("A","D"))
+mean(s2$D[,2] - s2$D[,1])
+
+# in a perfectly controlled experiment where I can hold A constant while manipulating M:
+
+sim_dat <- data.frame( M=seq(from=-2,to=2,length.out=30) , A=0 )
+s <- sim( m5.3_A , data=sim_dat , vars="D" )
+plot( sim_dat$M , colMeans(s) , ylim=c(-2,2) , type="l" ,
+xlab="manipulated M" , ylab="counterfactual D" )
+shade( apply(s,2,PI) , sim_dat$M )
+mtext( "Total counterfactual effect of M on D" )
+
+sim2_dat <- data.frame(M = (c(70,35) - mean(d$Marriage))/sd(d$Marriage),A = 0)
+s2 <- sim(m5.3_A, dat = sim2_dat, vars = c("D"))
+mean(s2[,2] - s2[,1])
+
+```
+##5H3
+
+```{r}
+data(milk)
+d <- milk
+str(d)
+
+
+d$K <- standardize(d$kcal.per.g)
+d$N <- standardize(d$neocortex.perc)
+d$M <- standardize(log(d$mass))
+dcc <- d[complete.cases(d$K,d$N,d$M),]
+
+m5.7 <- quap(
+  alist(
+    ### M -> N <- K
+    K ~ dnorm( mu , sigma ) ,
+    mu <- a + bN*N + bM*M ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bN ~ dnorm( 0 , 0.5 ) ,
+    bM ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 ),
+    ### M -> N
+    N ~ dnorm(mu_N,sigma_N),
+    mu_N <- aN + bMN* M,
+    aN ~ dnorm(0,.2),
+    bMN ~ dnorm(0,.5),
+    sigma_N ~ dexp(1)
+  ) , data=dcc )
+precis(m5.7)
+
+plot( coeftab( m5.7 ) , pars=c("bM","bN","bMN") )
+
+M_seq <- seq(from = -2, to = 2, length.out = 30)
+
+sim_dat <- data.frame(M = M_seq)
+s <- sim(m5.7, data = sim_dat, vars = c("N", "K"))
+
+plot(sim_dat$M, colMeans(s$K), ylim = c(-2,2), type = "l",
+     xlab = "manipulated M",ylab = "counterfactual K")
+shade( apply(s$K, 2, PI), sim_dat$M)
+
+range(dcc$mass)
+mean(dcc$mass)
+
+sim2_dat <- data.frame(M = (c(10,20) - mean(dcc$mass))/sd(dcc$mass))
+s2 <- sim(m5.7, dat = sim2_dat, vars = c("N","K"))
+mean(s2$K[,2] - s2$K[,1])
+
+
+```
+
+##5H4
+
+```{r}
+
+lds <- read_csv("../data/lds.csv")
+data("WaffleDivorce")
+d <- WaffleDivorce %>%
+  left_join(lds, by = join_by(Location == state)) %>%
+  mutate(perc_lds = str_remove(perc_lds, "%") %>% as.numeric()) %>%
+  mutate(D = standardize(Divorce), 
+         M = standardize(Marriage),
+         A = standardize(MedianAgeMarriage),
+         L = standardize(car::logit(perc_lds)),
+         S = if_else(d$South == 1,2,1))
+
+plot(dag <- dagitty("dag{
+                    A -> M
+                    A -> D
+                    S -> A
+                    S -> M
+                    S -> D}"))
+
+impliedConditionalIndependencies(dag)
+
+plot(dag2 <- dagitty("dag{
+                    M -> A
+                    A -> D
+                    S -> A
+                    S -> M
+                    S -> D}"))
+
+impliedConditionalIndependencies(dag2)
+
+m5.1 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bA * A,
+    a[S] ~ dnorm(0,.2),
+    bA ~ dnorm(0,.2),
+    sigma ~ dexp(1)),
+  data = d
+)
+
+m5.2 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bM * M,
+    a ~ dnorm(0,.2),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1)),
+  data = d
+)
+
+m5.3 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bA* A + bM * M,
+    a[S] ~ dnorm(0,.2),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1)),
+  data = d
+)
+
+labels <- paste("a[",1:2,"]:",c("Not South","South",sep = ""))
+plot(precis(m5.3,depth = 2, pars = c("bM","a")))
+plot(coeftab(m5.2), pars = c("a","bM"))
+
+plot(coeftab(m5.1,m5.2,m5.3), pars = c("bA", "bM", "a"))
+
+```
+
+Southernness may increase States' divorce rates through its influence on the other variables.
+
+I think that Southern States will decrease age at marriage, increase overall marriage rate, and decrease divorce rate directly. However, the effect of decreasing age at marriage (increased divorce rates) seems to swamp the direct effect of Southernness (decreased divorce rate).
+
+```{r}
+
+m5.3 <- quap(
+  alist(
+    ### S, A, M -> D
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bA* A + bM * M,
+    a[S] ~ dnorm(0,.5),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1),
+    ### S -> A <- M
+    A ~ dnorm(mu_A, sigma_A),
+    mu_A <- a[S] + bMA * M,
+    bMA ~ dnorm(0,.5),
+    sigma_A ~ dexp(1),
+    ### S -> M
+    M ~ dnorm(mu_M, sigma_M),
+    mu_M <- a[S],
+    sigma_M ~ dexp(1)
+    ),
+  data = d
+)
+
+labels <- paste("a[",1:2,"]:",c("Not South","South",sep = ""))
+plot(precis(m5.3,depth = 2, pars = c("a")))
+
+post <- extract.samples(m5.3)
+post$diff_s <- post$a[,1]-post$a[,2]
+
+precis(post, depth = 2)
+
+```
+
+When considering the whole dag, perhaps there's no significant difference between south and not south? It seems that S might contain information already contained in A.
+
+```{r}
+
+m5.3 <- quap(
+  alist(
+    ### S, A, M -> D
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bM * M,
+    a[S] ~ dnorm(0,.5),
+    #bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1),
+    ### S -> A <- M
+    # A ~ dnorm(mu_A, sigma_A),
+    # mu_A <- a[S] + bMA * M,
+    # bMA ~ dnorm(0,.5),
+    # sigma_A ~ dexp(1),
+    ### S -> M
+    M ~ dnorm(mu_M, sigma_M),
+    mu_M <- a[S],
+    sigma_M ~ dexp(1)
+    ),
+  data = d
+)
+
+labels <- paste("a[",1:2,"]:",c("Not South","South",sep = ""))
+plot(precis(m5.3,depth = 2, pars = c("a")))
+
+post <- extract.samples(m5.3)
+post$diff_s <- post$a[,1]-post$a[,2]
+
+precis(post, depth = 2)
+
+```
+
+Yes. It looks like south and A contain very similar information. The effect of S on divorce rate disappears when A is included in the model.
