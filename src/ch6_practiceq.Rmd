@@ -420,7 +420,7 @@ area -> food -> groupsize -> weight
 }")
 drawdag( sixm3)
 
-adjustmentSets(sixm3,effect = "total")
+adjustmentSets(sixm3,effect = "direct")
 impliedConditionalIndependencies(sixm3)
 ```
 
@@ -437,9 +437,10 @@ d <- foxes %>%
 m6h3 <- quap(
   alist(
     weight ~ dnorm(mu, sigma),
-    mu <- a + bA * A,
+    mu <- a + bA * A + bF * F,
     a ~ dnorm(mean(d$weight),.5),
     bA ~ dnorm(0,.5),
+    bF ~ dnorm(0,.5),
     sigma ~ dexp(1)
   ),data = d
 )
@@ -472,4 +473,73 @@ adjustmentSets(sixh4,effect = "direct")
 impliedConditionalIndependencies(sixh4)
 ```
 
+### Model definition 
 
+```{r}
+m6h4 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bG * G + bF * F,
+    a ~ dnorm(mean(d$weight),.5),
+    bG ~ dnorm(0,.5),
+    bF ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+precis(m6h4) %>% plot()
+```
+
+Yes, it looks like adding food would have a positive effect on fox weight, mean = .5 SD
+
+### Prior predictive simulation
+
+```{r}
+set.seed(11)
+prior <- extract.prior( m6h4 )
+mu <- link( m6h4 , post=prior , data=list( F=c(-2,2),G = 0 ) )
+plot( NULL , xlim=c(-2,2) , ylim=range(d$weight) )
+for ( i in 1:50 ) lines( c(-2,2) , mu[i,] , col=col.alpha("black",0.4) )
+```
+
+## 6H4 Direct effect of larger group size on weight. Essentially breaks the causal relationships between food, area, and groupsize.
+
+```{r}
+sixh5 <- dagitty( "dag {
+groupsize[exposure]
+weight[outcome]
+area -> food -> weight
+area -> food -> groupsize -> weight
+}")
+drawdag( sixh5)
+
+adjustmentSets(sixh5,effect = "direct")
+impliedConditionalIndependencies(sixh5)
+```
+
+### Model definition 
+
+```{r}
+m6h5 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bG * G + bF * F,
+    a ~ dnorm(mean(d$weight),.5),
+    bG ~ dnorm(0,.5),
+    bF ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+precis(m6h5) %>% plot()
+```
+
+Yes, it looks like increasing group size would have a negative effect on fox weight, mean = -.5 SD
+
+### Prior predictive simulation
+
+```{r}
+set.seed(10)
+prior <- extract.prior( m6h5 )
+mu <- link( m6h5 , post=prior , data=list( G=c(-2,2),F = 0 ) )
+plot( NULL , xlim=c(-2,2) , ylim=range(d$weight) )
+for ( i in 1:50 ) lines( c(-2,2) , mu[i,] , col=col.alpha("black",0.4) )
+```
