@@ -1,0 +1,475 @@
+---
+title: "Chapter 6 practice problems"
+output: html_notebook
+---
+
+```{r setup}
+require(tidyverse)
+require(rethinking)
+require(dagitty)
+```
+
+
+## 6E1
+
+1) Multicollinearity
+2) Collider bias
+3) Post-treatment bias
+    - this may be a big one in my study. More difficult to understand what exactly the treatment brings about. But if the causal links are maintained, is this a problem? 
+    - Maybe this is the point of path analysis, breaking each causal link apart to decrease this problem
+    - Or maybe that's for collider bias?
+
+## 6E2
+
+An example of collider bias in my own research would be if my sites were spread across a geographic gradient that differed not in temperature but in some other unobserved variable that affected both temperature and growth. Then conditioning on temperature would induce a non-causal correlation between land cover and growth.
+
+## 6E3
+
+- fork x <- z -> y
+    - x and y are independent, conditional on z. If we don't condition on z, non-causal correlation will exist between x and y
+- pipe x -> z -> y
+    - x and y are independent conditional on z. Including z in a regression model will make x and y appear to be independent, when in fact they are causally connected.
+- collider x -> z <- y
+    - x and y are independent, but including z in a regression model will induce a correlation between x and y.
+- descendant
+    - similar to above, conditioning on a descendant variable of a collider will partially condition on the collider. This can happen when a proxy variable is used - could partially open a backdoor path.
+
+## 6E4
+
+A biased sample could be the result of two or more selection criteria being equally valued and uncorrelated in the selection pool. For example, if I selected nests based on parent activity and heat, and included those variables in a regression, then I might see a non-causal negative correlation between parent activity and heat. As is, we expect there to also be a causal negative correlation between parent activity and heat, so this selection process could prevent accurate estimation of the causal effect. It probably wouldn't interfere with the direction of the effect, but it could reduce uncertainty associated with the coefficient describing the effect of heat on parent activity, exaggerating the causal effect's significance.
+
+## 6M1
+
+```{r}
+sixm1 <- dagitty( "dag {
+U[unobserved]
+V[unobserved]
+X[exposure]
+Y[outcome]
+U -> X -> Y <- C
+U <- A -> C
+U -> B <- C
+C <- V -> Y
+}")
+drawdag( sixm1 )
+```
+
+There are five paths:
+
+1. X -> Y
+2. X <- U -> B <- C -> X
+3. X <- U -> B <- C <- V -> X
+4. X <- U <- A -> C -> X
+5. X <- U <- A -> C <- V -> X
+
+Two are open backdoor paths: 4 and 5
+
+In both cases, conditioning on A will close the backdoor paths, allowing for accurate estimation of the effect of X on Y. so Y ~ a + b * X + b * A
+
+## 6M2
+
+```{r}
+N = 200
+
+b_XZ = .9
+b_ZY = .7
+
+set.seed(1)
+X = rnorm(N)
+Z = rnorm(N, b_XZ * X, sd = .2)
+Y = rnorm(N, b_ZY * Z)
+
+d <- data.frame(X = X, Z = Z, Y = Y)
+d
+
+pairs(d)
+```
+
+```{r}
+m6m2 <- quap(
+  alist(
+    Y ~ dnorm(mu, sigma),
+    mu <- a + b_XY * X + b_ZY * Z,
+    a ~ dnorm(0,1),
+    c(b_XY,b_ZY) ~ dnorm(0,1),
+    sigma ~ dexp(1)
+  ), data = d
+)
+
+precis(m6m2)
+```
+
+Including Z means that X will appear to be independent of Y in this regression because X _||_ Y | Z for a pipe. Z should be excluded from the regression if we want to accurately estimate the direct effect of X on Y.
+
+## 6M3
+
+1. 
+```{r}
+sixm3 <- dagitty( "dag {
+X[exposure]
+Y[outcome]
+X -> Y
+X <- Z -> Y
+X <- Z <- A -> Y
+}")
+drawdag( sixm3)
+sixm3 %>% adjustmentSets(effect = "direct")
+```
+    - Paths:
+        1. X -> Y
+        2. X <- Z -> Y
+            Condition on Z
+        3. X <- Z <- A -> Y
+            Condition on Z
+    Z functions as a fork in path 2 and a pipe in path 3, so conditioning on Z will block both paths.
+2.
+```{r}
+sixm3 <- dagitty( "dag {
+X[exposure]
+Y[outcome]
+Z <- X -> Y
+Y <- A -> Z -> Y
+}")
+drawdag( sixm3)
+sixm3 %>% adjustmentSets(effect = "direct")
+```
+    - Paths:
+        1. X -> Y
+        2. X -> Z -> Y
+            Condition on Z to block this path
+        3. X -> Z <- A -> Y
+            This path is blocked by collider Z, but conditioning on Z to close the first path will open the third, so need to condition on A to close this path.
+3. 
+```{r}
+sixm3 <- dagitty( "dag {
+X[exposure]
+Y[outcome]
+X -> Y
+X <- A -> Z <- Y
+X -> Z <- Y
+}")
+drawdag( sixm3)
+sixm3 %>% adjustmentSets(effect = "direct")
+```
+    - Paths:
+        1. X -> Y
+        2. X <- A -> Z <- Y
+        3. X -> Z <- Y
+    Both paths are blocked by collider Z, so do not need to condition on any variables.
+4.
+```{r}
+sixm3 <- dagitty( "dag {
+X[exposure]
+Y[outcome]
+X -> Y
+X -> Z -> Y
+X <- A -> Z -> Y
+}")
+drawdag( sixm3)
+
+sixm3 %>% adjustmentSets(effect = "direct")
+```
+    - Paths:
+        1. X -> Y
+        2. X -> Z -> Y
+        3. X <- A -> Z -> Y
+    I think that conditioning on Z in paths 2 & 3 closes both (both are a pipe.)
+    
+## 6H1
+
+```{r}
+lds <- read_csv("../data/lds.csv")
+data("WaffleDivorce")
+d <- WaffleDivorce %>%
+  left_join(lds, by = join_by(Location == state)) %>%
+  mutate(perc_lds = str_remove(perc_lds, "%") %>% as.numeric()) %>%
+  mutate(D = car::logit(Divorce), 
+         M = standardize(car::logit(Marriage)),
+         A = standardize(MedianAgeMarriage),
+         L = standardize(car::logit(perc_lds)),
+         S = if_else(South == 1,2,1),
+         W = standardize(WaffleHouses))
+
+sixm3 <- dagitty( "dag {
+W[exposure]
+D[outcome]
+W -> D
+W <- S -> A -> D
+A <- L -> M
+M -> D
+A -> M
+S -> M
+}")
+drawdag( sixm3)
+
+sixm3 %>% adjustmentSets(effect = "direct")
+```
+
+Based on this DAG, we have two options to estimate the effect of W on D:
+
+1. D ~ W + S
+2. D ~ W + A + M
+
+I'll build models based on both options to compare the effect of categorical vs continuous variables on estimate uncertainty.
+
+```{r}
+m6h1.1 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bW * W,
+    a[S] ~ dnorm(0,.5),
+    bW ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+
+post <- extract.samples(m6h1.1)
+post$diff_s <- post$a[,1]-post$a[,2]
+plot(precis(post,pars = c("bW","diff_s")))
+
+precis(post, depth = 2)
+```
+
+
+```{r}
+m6h1.2 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bW * W + bA* A + bM * M,
+    a ~ dnorm(0,.2),
+    bW ~ dnorm(0,.5),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+
+#plot(precis(c(post,m6h1.2),pars = c("diff_s","bW","bA","bM")))
+
+plot(precis(m6h1.2), pars = c("bW","bA","bM","sigma"))
+
+```
+
+Something about conditioning on A and M may have opened a backdoor path that I didn't anticipate, or failed to close a backdoor path (some other common cause of A, M, W - S?). With the underlying assumption that the right answer is no causal association, S appears to be the far better choice for closing backdoor paths.
+
+## 6H2
+
+```{r}
+impliedConditionalIndependencies(sixm3)
+```
+
+Wow that's a lot of implied conditional independencies.
+
+### Model 1: A _||_ W | S &#10003;
+
+```{r}
+m6h2.1 <- quap(
+  alist(
+    A ~ dnorm(mu,sigma),
+    mu <- a[S] + bW * W,
+    a[S] ~ dnorm(0,.5),
+    bW ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+
+plot(precis(m6h2.1))
+```
+
+### Model 2: D _||_ L | A, M, S &#10003; or &#10007; 0 is included in the interval around bL but on the high edge of the PI
+
+```{r}
+m6h2.2 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bL * L + bA * A + bM * M,
+    a[S] ~ dnorm(0,.5),
+    bL ~ dnorm(0,.5),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+
+plot(precis(m6h2.2))
+```
+
+### Model 3: D _||_ L | A, M, W &#10003; or &#10007; 0 is just outside the PI
+
+```{r}
+m6h2.3 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a + bL * L + bA * A + bM * M + bW * W,
+    a ~ dnorm(0,.2),
+    bL ~ dnorm(0,.5),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    bW ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+
+plot(precis(m6h2.3))
+```
+
+### Model 4: D _||_ S | A, M, W &#10003; the PI for the difference overlaps 0
+
+```{r}
+m6h2.4 <- quap(
+  alist(
+    D ~ dnorm(mu,sigma),
+    mu <- a[S] + bA * A + bM * M + bW * W,
+    a[S] ~ dnorm(0,.5),
+    bA ~ dnorm(0,.5),
+    bM ~ dnorm(0,.5),
+    bW ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+post <- extract.samples(m6h2.4)
+post$diff_s <- post$a[,1]-post$a[,2]
+plot(precis(post,pars = c("bA","bM","bW","diff_s")))
+```
+
+### Model 5: L _||_ S &#10003; the PI for the difference overlaps 0
+
+```{r}
+m6h2.5 <- quap(
+  alist(
+    L ~ dnorm(mu,sigma),
+    mu <- a[S],
+    a[S] ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+post <- extract.samples(m6h2.5)
+post$diff_s <- post$a[,1]-post$a[,2]
+plot(precis(post,pars = c("diff_s")))
+```
+
+### Model 6: L _||_ W &#10003; the PI for bW overlaps 0
+
+```{r}
+m6h2.6 <- quap(
+  alist(
+    L ~ dnorm(mu,sigma),
+    mu <- a + bW * W,
+    a ~ dnorm(0,.5),
+    bW ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+plot(precis(m6h2.6))
+```
+
+### Model 7: M _||_ W | S &#10003; the PI for bW overlaps 0
+
+```{r}
+m6h2.7 <- quap(
+  alist(
+    M ~ dnorm(mu,sigma),
+    mu <- a[S] + bW * W,
+    a[S] ~ dnorm(0,.2),
+    bW ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+    ),
+  data = d
+)
+post <- extract.samples(m6h2.7)
+post$diff_s <- post$a[,1]-post$a[,2]
+plot(precis(post,pars = c("diff_s","bW")))
+```
+
+The tests for D _||_ L | A, M, W and D _||_ L | A, M, S failed, and the mean estimate of the effect of S on L is positive.. So I'm suspecting that those two variables are intertwined. Perhaps Southern states are more accepting of right wing cults?
+
+```{r}
+sixm3 <- dagitty( "dag {
+W[exposure]
+D[outcome]
+W -> D
+W <- S -> A -> D
+A <- L -> M
+M -> D
+A -> M
+S -> M
+S -> L
+}")
+drawdag( sixm3)
+
+adjustmentSets(sixm3,effect = "direct")
+impliedConditionalIndependencies(sixm3)
+```
+
+## 6H3
+
+```{r}
+sixm3 <- dagitty( "dag {
+area[exposure]
+weight[outcome]
+area -> food -> weight
+area -> food -> groupsize -> weight
+}")
+drawdag( sixm3)
+
+adjustmentSets(sixm3,effect = "total")
+impliedConditionalIndependencies(sixm3)
+```
+
+### Model definition
+
+```{r}
+data(foxes)
+d <- foxes %>%
+  mutate(F = standardize(avgfood),
+         G = standardize(groupsize),
+         A = standardize(area),
+         W = standardize(weight))
+
+m6h3 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bA * A,
+    a ~ dnorm(mean(d$weight),.5),
+    bA ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+precis(m6h3) %>% plot()
+```
+Increasing the area of a fox's territory doesn't appear to have any effect on its weight.
+
+### Prior predictive simulation
+
+```{r}
+set.seed(10)
+prior <- extract.prior( m6h3 )
+mu <- link( m6h3 , post=prior , data=list( A=c(-2,2) ) )
+plot( NULL , xlim=c(-2,2) , ylim=range(d$weight) )
+for ( i in 1:50 ) lines( c(-2,2) , mu[i,] , col=col.alpha("black",0.4) )
+```
+
+## 6H4 Direct effect of adding food on weight. Essentially breaks the causal relationships between food, area, and groupsize.
+
+```{r}
+sixh4 <- dagitty( "dag {
+food[exposure]
+weight[outcome]
+area -> food -> weight
+area -> food -> groupsize -> weight
+}")
+drawdag( sixh4)
+
+adjustmentSets(sixh4,effect = "direct")
+impliedConditionalIndependencies(sixh4)
+```
+
+
