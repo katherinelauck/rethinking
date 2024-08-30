@@ -125,11 +125,11 @@ d <- Laffer %>%
 m7h1 <- quap(
   alist(
     rev_std ~ dnorm(mu,exp(log.sigma)),
-    mu <- a + b_rate * rate_std,
+    mu <- a + b_rate[1] * rate_std,
     a ~ dnorm(.5,2),
     b_rate ~ dnorm(0,.5),
     log.sigma ~ dnorm(0,1)
-  ), data = d
+  ), data = d, start = list(b_rate = rep(0,1))
 )
 
 post <- extract.samples(m7h1)
@@ -198,7 +198,236 @@ plot( rev_std ~ rate_std , data=d )
 lines( rate_seq , mu )
 shade( ci , rate_seq )
 
-compare()
+plot(coeftab(m7h1, m7h1.2, m7h1.3, m7h1.4))
 
 ```
 
+I don't think that these models are really the right ones - I feel like it's missing some kind of confound or something. Maybe there are governing characteristics of the countries that change the slope of the relationship? Anyways for most of the graph the relationship is positive. Where does the US fit into this picture?
+
+## 7H2
+
+```{r}
+set.seed(24071847)
+PSIS_m7h1 <- PSIS(m7h1,pointwise=TRUE) %>%
+  add_column(d)# %>%
+  #pull(k) %>% hist()
+
+set.seed(24071847)
+WAIC_m7h1 <- WAIC(m7h1,pointwise=TRUE)
+plot( PSIS_m7h1$k , WAIC_m7h1$penalty , xlab="PSIS Pareto k" ,
+ylab="WAIC penalty" , col=rangi2 , lwd=2 , main = "y~x")
+```
+
+```{r}
+set.seed(24071847)
+PSIS_m7h1.2 <- PSIS(m7h1.2,pointwise=TRUE) %>%
+  add_column(d)# %>%
+  #pull(k) %>% hist()
+
+set.seed(24071847)
+WAIC_m7h1.2 <- WAIC(m7h1.2,pointwise=TRUE)
+plot( PSIS_m7h1.2$k , WAIC_m7h1.2$penalty , xlab="PSIS Pareto k" ,
+ylab="WAIC penalty" , col=rangi2 , lwd=2 , main = "y~x^2")
+
+```
+
+There are two outliers with a lot of influence for the first order model, and three in the second order model.
+
+```{r}
+
+m7h1 <- quap(
+  alist(
+    rev_std ~ dstudent(2,mu,exp(log.sigma)),
+    mu <- a + b_rate[1] * rate_std,
+    a ~ dnorm(.5,2),
+    b_rate ~ dnorm(0,.5),
+    log.sigma ~ dnorm(0,1)
+  ), data = d, start = list(b_rate = rep(0,1))
+)
+
+post <- extract.samples(m7h1)
+rate_seq <- seq( from=min(d$rate_std) , to=max(d$rate_std) , length.out=100 )
+l <- link( m7h1 , data=list( rate_std=rate_seq ) )
+mu <- apply( l , 2 , mean )
+ci <- apply( l , 2 , PI )
+plot( rev_std ~ rate_std , data=d )
+lines( rate_seq , mu )
+shade( ci , rate_seq )
+
+m7h1.2 <- quap(
+  alist(
+    rev_std ~ dstudent(2,mu,exp(log.sigma)),
+    mu <- a + b_rate[1] * rate_std + b_rate[2] * rate_std^2,
+    a ~ dnorm(.5,2),
+    b_rate ~ dnorm(0,10),
+    log.sigma ~ dnorm(0,1)
+  ), data = d, start = list(b_rate = rep(0,2))
+)
+
+post <- extract.samples(m7h1.2)
+rate_seq <- seq( from=min(d$rate_std) , to=max(d$rate_std) , length.out=100 )
+l <- link( m7h1.2 , data=list( rate_std=rate_seq ) )
+mu <- apply( l , 2 , mean )
+ci <- apply( l , 2 , PI )
+plot( rev_std ~ rate_std , data=d )
+lines( rate_seq , mu )
+shade( ci , rate_seq )
+
+set.seed(24071847)
+PSIS_m7h1.2 <- PSIS(m7h1.2,pointwise=TRUE) %>%
+  add_column(d)# %>%
+  #pull(k) %>% hist()
+
+set.seed(24071847)
+WAIC_m7h1.2 <- WAIC(m7h1.2,pointwise=TRUE)
+plot( PSIS_m7h1.2$k , WAIC_m7h1.2$penalty , xlab="PSIS Pareto k" ,
+ylab="WAIC penalty" , col=rangi2 , lwd=2 , main = "y~x^2")
+
+plot(coeftab(m7h1, m7h1.2))
+```
+
+With dstudent, none of the WAIC or PSIS penalties are concerning - the outlier no longer has much influence. The results look pretty similar though.
+
+## 7H3
+
+```{r}
+d <- tibble(island = rep(c(1,2,3), each = 5),species = rep(c("A","B","C","D","E"), times = 3),
+            prop = c(.2,.2,.2,.2,.2,.8,.1,.05,.025,.025,.05,.15,.7,.05,.05))
+
+
+d |> split(d$island) |> map_dbl(\(x) -sum(x$prop*log(x$prop) ))
+```
+
+
+Calculate KL divergences
+
+```{r}
+kld <- function(island_q, island_p) {
+  vector_q <- d %>% filter(island == island_q) %>% pull(prop)
+  vector_p <- d %>% filter(island == island_p) %>% pull(prop)
+  sum(vector_p * log(vector_p/vector_q))
+}
+
+island_combos <- tibble(q = rep(c(1,2,3),each = 2),
+                        p = c(2,3,1,3,1,2))
+
+island_combos$kld <- map2(island_combos$q, island_combos$p, kld) %>% unlist
+```
+
+Island 1 predicts islands 2 and 3 better than the other island combos, even though (because?) it has more entropy- the probability density is spread across all five species. This allows it to be flexible to islands 2 and 3, which have lower entropy: more certainty about which species will be encountered (sp A on island 2 and sp C on island 3).
+
+## 7H4
+
+```{r}
+
+d <- sim_happiness( seed=1977 , N_years=1000 )
+precis(d)
+
+d2 <- d[ d$age>17 , ] # only adults
+d2$A <- ( d2$age - 18 ) / ( 65 - 18 )
+
+d2$mid <- d2$married + 1
+
+
+m6.9 <- quap(
+alist(
+happiness ~ dnorm( mu , sigma ),
+mu <- a[mid] + bA*A,
+a[mid] ~ dnorm( 0 , 1 ),
+bA ~ dnorm( 0 , 2 ),
+sigma ~ dexp(1)
+) , data=d2 )
+precis(m6.9,depth=2)
+
+m6.10 <- quap(
+alist(
+happiness ~ dnorm( mu , sigma ),
+mu <- a + bA*A,
+a ~ dnorm( 0 , 1 ),
+bA ~ dnorm( 0 , 2 ),
+sigma ~ dexp(1)
+) , data=d2 )
+precis(m6.10)
+
+compare(m6.9,m6.10)
+
+```
+
+WAIC comparison suggests that m6.9 will make better predictions about out of sample data than m6.10. However, WAIC is not intended to answer causal questions. Conditioning on a collider often reduces WAIC scores because more information is shared between the two predictor variables, but it can open a backdoor path and bias the estimate of the causal relationship between the exposure and the outcome.
+
+## 7H5
+
+
+```{r}
+data(foxes)
+d <- foxes %>%
+  mutate(F = standardize(avgfood),
+         G = standardize(groupsize),
+         A = standardize(area),
+         W = standardize(weight))
+
+m7h5.1 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bA * A + bF * F + bG * G,
+    a ~ dnorm(mean(d$weight),.5),
+    bA ~ dnorm(0,.5),
+    bF ~ dnorm(0,.5),
+    bG ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+
+m7h5.2 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bF * F + bG * G,
+    a ~ dnorm(mean(d$weight),.5),
+    bF ~ dnorm(0,.5),
+    bG ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+
+m7h5.3 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bA * A + bG * G,
+    a ~ dnorm(mean(d$weight),.5),
+    bA ~ dnorm(0,.5),
+    bG ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+
+m7h5.4 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bF * F,
+    a ~ dnorm(mean(d$weight),.5),
+    bF ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+
+m7h5.5 <- quap(
+  alist(
+    weight ~ dnorm(mu, sigma),
+    mu <- a + bA * A,
+    a ~ dnorm(mean(d$weight),.5),
+    bA ~ dnorm(0,.5),
+    sigma ~ dexp(1)
+  ),data = d
+)
+
+compare(m7h5.1,m7h5.2,m7h5.3,m7h5.4,m7h5.5)
+
+sixm3 <- dagitty( "dag {
+weight[outcome]
+area -> food -> weight
+area -> food -> groupsize -> weight
+}")
+drawdag( sixm3)
+```
+
+Model 1 has the lowest WAIC score, so it is expected to predict weight best out-of-sample. It looks like these models have WAIC scores that are different mainly because they have different numbers of parameters. The SE of the most complex model is the largest, which makes sense, because more parameters carry more uncertainty. Looks like the predictors aren't that different in terms of predictive ability, which makes sense because the models exchanged area and food for each other, and removing one makes it more or less equivalent in causal terms to the other.
