@@ -1,0 +1,204 @@
+---
+title: "Chapter 7 practice questions"
+output: html_notebook
+---
+
+```{r setup}
+require(tidyverse)
+require(rethinking)
+require(dagitty)
+```
+
+## 7E1
+
+Three motivating criteria for information theory:
+
+Overall, information theory is concerned with measuring the reduction in uncertainty about the truth when we learn an outcome. When we don't have a true test sample, comparing two models' predictive accuracy is the best we can do. Sometimes even if the true data-generating model is included in the candidate models, a more complex model will outperform it in terms of prediction. So ranking models by any information criterion tells us about their ability to make predictions, not their causal relevance.
+
+Information entropy is continuous, that is, it has no breaks and is not sensitive to small changes in any one probability.
+It is larger when there are more options for outcomes; or more ways to be wrong. Harder to predict accurately when there are more ways to be wrong.
+It is additive; so adding additional combinations of events increases the total uncertainty by the additional combinations' uncertainty.
+
+## 7E2
+
+```{r}
+p <- c( 0.7 , 0.3 )
+-sum( p*log(p) )
+```
+
+## 7E3
+
+```{r}
+p <- c( 0.2 , 0.25,.25,.3 )
+-sum( p*log(p) )
+```
+
+## 7E4
+
+```{r}
+p <- c(1/3,1/3,1/3 )
+-sum( p*log(p) )
+```
+
+## 7M1 - compare AIC and WAIC
+
+AIC = Akaike Information Criterion. Approximates the cross-validation score of a model, which is itself an approximation of the average relative out of sample KL divergence, or the distance between the information contained in two models relative to the theoretical "true model". It is the pointwise average log-probability, penalized proportionally to the number of free parameters. This estimate is accurate when:
+
+1. The priors or flat or there is lots of data such that the priors don't matter
+2. The posterior distribution is approximately Gaussian
+3. N obs >> number of parameters k
+
+WAIC = Widely Applicable Information Criterion is the more general cousin. It only requires that N>>k, so we can use both informative priors and non-Gaussian distributions. It also is based in the pointwise average log-probability, but it is penalized differently: the sum of the variance in log-probabilities for each observation. Each observation has its own penalty score, which can also function as a measure of overfitting risk.
+
+## 7M2
+
+For model selection, we're using information criteria to select a candidate model or several candidate models for prediction, discarding the information contained in the criteria used to compare them. Optimizing on predictive accuracy (AIC, WAIC, PSIS, CV) and then using the resulting model for causal analysis will likely result in confounding, because predictive accuracy and causal inference are two separate goals.
+
+In the case of model comparison, the difference in information criteria between models will help us understand the effects of model structure on coefficient estimation, given a set of causal models.
+
+## 7M3
+
+All models must be fit to exactly the same number of obs because when adding more obs, the deviance will certainly increase. Information entropy is additive, so when adding a datapoint, it's like an additional way to be "wrong", increasing the entropy of the model.
+
+## 7M4
+
+```{r}
+library(rethinking)
+data(WaffleDivorce)
+d <- WaffleDivorce
+d$A <- standardize( d$MedianAgeMarriage )
+d$D <- standardize( d$Divorce )
+d$M <- standardize( d$Marriage )
+m5.3.1 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + bM*M + bA*A ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bM ~ dnorm( 0 , 1 ) ,
+    bA ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 )
+  ) , data = d )
+
+m5.3..5 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + bM*M + bA*A ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bM ~ dnorm( 0 , .5) ,
+    bA ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 )
+  ) , data = d )
+
+m5.3..2 <- quap(
+  alist(
+    D ~ dnorm( mu , sigma ) ,
+    mu <- a + bM*M + bA*A ,
+    a ~ dnorm( 0 , 0.2 ) ,
+    bM ~ dnorm( 0 , .2 ) ,
+    bA ~ dnorm( 0 , 0.5 ) ,
+    sigma ~ dexp( 1 )
+  ) , data = d )
+
+compare(m5.3.1,m5.3..5,m5.3..2, func=PSIS)
+compare(m5.3.1,m5.3..5,m5.3..2, func=WAIC)
+
+```
+
+So as the priors become more regularizing, the penalty decreases, so the effective number of parameters decreases. This makes sense because regularization forces the model to engage in more "data compression" - using fewer parameters than the number of observations.
+
+## 7M5
+
+Informative priors reduce overfitting because they slow the model's rate of learning especially where they have little probability density. This helps the model reduce learning from the irregular features in a dataset. 
+
+## 7M6
+
+Overly informative priors can cause underfitting when they don't allow the model to learn anything from the data; the posterior distribution just reproduces the priors.
+
+## 7H1
+
+```{r}
+data(Laffer)
+d <- Laffer %>%
+  mutate(rate_std = standardize(tax_rate),
+         rev_std = standardize(tax_revenue))
+
+m7h1 <- quap(
+  alist(
+    rev_std ~ dnorm(mu,exp(log.sigma)),
+    mu <- a + b_rate * rate_std,
+    a ~ dnorm(.5,2),
+    b_rate ~ dnorm(0,.5),
+    log.sigma ~ dnorm(0,1)
+  ), data = d
+)
+
+post <- extract.samples(m7h1)
+rate_seq <- seq( from=min(d$rate_std) , to=max(d$rate_std) , length.out=100 )
+l <- link( m7h1 , data=list( rate_std=rate_seq ) )
+mu <- apply( l , 2 , mean )
+ci <- apply( l , 2 , PI )
+plot( rev_std ~ rate_std , data=d )
+lines( rate_seq , mu )
+shade( ci , rate_seq )
+
+m7h1.2 <- quap(
+  alist(
+    rev_std ~ dnorm(mu,exp(log.sigma)),
+    mu <- a + b_rate[1] * rate_std + b_rate[2] * rate_std^2,
+    a ~ dnorm(.5,2),
+    b_rate ~ dnorm(0,10),
+    log.sigma ~ dnorm(0,1)
+  ), data = d, start = list(b_rate = rep(0,2))
+)
+
+post <- extract.samples(m7h1.2)
+rate_seq <- seq( from=min(d$rate_std) , to=max(d$rate_std) , length.out=100 )
+l <- link( m7h1.2 , data=list( rate_std=rate_seq ) )
+mu <- apply( l , 2 , mean )
+ci <- apply( l , 2 , PI )
+plot( rev_std ~ rate_std , data=d )
+lines( rate_seq , mu )
+shade( ci , rate_seq )
+
+m7h1.3 <- quap(
+  alist(
+    rev_std ~ dnorm(mu,exp(log.sigma)),
+    mu <- a + b_rate[1] * rate_std + b_rate[2] * rate_std^2 + b_rate[3] * rate_std^3,
+    a ~ dnorm(.5,2),
+    b_rate ~ dnorm(0,10),
+    log.sigma ~ dnorm(0,1)
+  ), data = d, start = list(b_rate = rep(0,3))
+)
+
+post <- extract.samples(m7h1.3)
+rate_seq <- seq( from=min(d$rate_std) , to=max(d$rate_std) , length.out=100 )
+l <- link( m7h1.3 , data=list( rate_std=rate_seq ) )
+mu <- apply( l , 2 , mean )
+ci <- apply( l , 2 , PI )
+plot( rev_std ~ rate_std , data=d )
+lines( rate_seq , mu )
+shade( ci , rate_seq )
+
+m7h1.4 <- quap(
+  alist(
+    rev_std ~ dnorm(mu,exp(log.sigma)),
+    mu <- a + b_rate[1] * rate_std + b_rate[2] * rate_std^2 + b_rate[3] * rate_std^3 + b_rate[4] * rate_std^4,
+    a ~ dnorm(.5,2),
+    b_rate ~ dnorm(0,10),
+    log.sigma ~ dnorm(0,1)
+  ), data = d, start = list(b_rate = rep(0,4))
+)
+
+post <- extract.samples(m7h1.4)
+rate_seq <- seq( from=min(d$rate_std) , to=max(d$rate_std) , length.out=100 )
+l <- link( m7h1.4 , data=list( rate_std=rate_seq ) )
+mu <- apply( l , 2 , mean )
+ci <- apply( l , 2 , PI )
+plot( rev_std ~ rate_std , data=d )
+lines( rate_seq , mu )
+shade( ci , rate_seq )
+
+compare()
+
+```
+
