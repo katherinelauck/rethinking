@@ -1,0 +1,619 @@
+---
+title: "Chapter 8 practice questions"
+output: html_notebook
+---
+
+```{r setup}
+require(tidyverse)
+require(rethinking)
+require(dagitty)
+```
+
+## 8E1
+
+1. Heat - bread requires both yeast and heat to rise.
+2. Demographics e.g. race - white men are more likely to be hired compared to WOC with the same education, and for higher salary.
+3. A more efficient engine will make a car go faster with the same amount of gas compared to a less efficient engine.
+
+## 8E2
+
+1. yes
+2. No (or)
+3. No
+4. No
+
+## 8E3
+
+1. onion score ~ rnorm(mu,sigma)
+   mu = a + Bheat * heat + Bmoist * moist + Bheatmoist * heat * moist
+2. speed ~ rnorm(mu,sigma)
+   mu = a + Bcyl * cyl + Binj * inj
+3. belief_fromparents ~ rbinom(p)
+   p = .7
+4. intelligence ~ rnorm(mu,sigma)
+   mu = a + Bsocial * social + Bappendage * appendage
+   
+## 8M1
+
+blooms = bloomscold * cold
+bloomscold ~ rnorm(mu,sigma)
+mu = a + Bshade * shade + Bwater * water + Bwatershade * water * shade
+
+Actually this feels more like a two step process: binomial is it hot or cold? If cold, then mu = the equation in the chapter
+
+## 8M2 - see above
+
+## 8M3
+
+The interaction would be contingent on ravens depending on wolves for their food. If they reproduce at a lower rate than expected based on their population size when wolf population is very low, then there is a statistical interaction between raven population growth and wolf population.
+mu_raven pop growth = a + Bravenpop * ravenpop + Bwolfpop * wolfpop + Bravenwolf * ravenpop * wolfpop
+
+## 8M4
+
+```{r}
+library(rethinking)
+data(tulips)
+d <- tulips
+str(d)
+
+d$blooms_std <- d$blooms / max(d$blooms)
+d$water_cent <- d$water - mean(d$water)
+d$shade_cent <- d$shade - mean(d$shade)
+
+a <- rnorm( 1e4 , 0.5 , 1 )
+sum( a < 0 | a > 1 ) / length( a )
+a <- rnorm( 1e4 , 0.5 , 0.25 )
+sum( a < 0 | a > 1 ) / length( a )
+
+m8.4 <- quap(
+alist(
+blooms_std ~ dnorm( mu , sigma ) ,
+mu <- a + bw*water_cent + bs*shade_cent ,
+a ~ dnorm( 0.25 , 0.2 ) ,
+bw ~ dnorm( .2 , 0.1 ) ,
+bs ~ dnorm( -.1 , 0.05 ) ,
+sigma ~ dexp( 1 )
+) , data=d )
+
+m8.5 <- quap(
+alist(
+blooms_std ~ dnorm( mu , sigma ) ,
+mu <- a + bw*water_cent + bs*shade_cent + bws*water_cent*shade_cent ,
+a ~ dnorm( 0.25 , 0.2 ) ,
+bw ~ dnorm( .2 , 0.1 ) ,
+bs ~ dnorm( -.1 , 0.05 ) ,
+bws ~ dnorm( 0 , 0.1 ) ,
+sigma ~ dexp( 1 )
+) , data=d )
+
+```
+
+### Prior predictions
+
+```{r}
+set.seed(7)
+prior <- extract.prior(m8.4)
+
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.4 ,post = prior, data=data.frame( shade_cent=s , water_cent=-1:1 ) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+
+set.seed(7)
+prior <- extract.prior(m8.5)
+
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.5 ,post = prior, data=data.frame( shade_cent=s , water_cent=-1:1 ) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+```
+
+### Posterior predictions
+
+```{r}
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.4 , data=data.frame( shade_cent=s , water_cent=-1:1 ) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.5 , data=data.frame( shade_cent=s , water_cent=-1:1 ) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+```
+
+
+We much more detailed information re: how fast increasing water mitigates the effects of shade, and vice versa. Seems like it would be pretty hard to constrain an interaction prior.
+
+## 8H1
+
+```{r}
+library(rethinking)
+data(tulips)
+d <- tulips
+str(d)
+
+d$blooms_std <- d$blooms / max(d$blooms)
+d$water_cent <- d$water - mean(d$water)
+d$shade_cent <- d$shade - mean(d$shade)
+
+a <- rnorm( 1e4 , 0.5 , 1 )
+sum( a < 0 | a > 1 ) / length( a )
+a <- rnorm( 1e4 , 0.5 , 0.25 )
+sum( a < 0 | a > 1 ) / length( a )
+
+m8.4_bed <- quap(
+alist(
+blooms_std ~ dnorm( mu , sigma ) ,
+mu <- a[bed] + bw*water_cent + bs*shade_cent ,
+a[bed] ~ dnorm( .4 , 0.25 ) ,
+bw ~ dnorm( .2 , 0.1 ) ,
+bs ~ dnorm( -.1 , 0.05 ) ,
+sigma ~ dexp( 1 )
+) , data=d )
+
+m8.5_bed <- quap(
+alist(
+blooms_std ~ dnorm( mu , sigma ) ,
+mu <- a[bed] + bw*water_cent + bs*shade_cent + bws*water_cent*shade_cent ,
+a[bed] ~ dnorm( .4 , 0.25 ) ,
+bw ~ dnorm( .2 , 0.1 ) ,
+bs ~ dnorm( -.1 , 0.05 ) ,
+bws ~ dnorm( 0 , 0.1 ) ,
+sigma ~ dexp( 1 )
+) , data=d )
+```
+
+### Prior predictions
+
+```{r}
+set.seed(7)
+prior <- extract.prior(m8.4_bed)
+
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.4_bed ,post = prior, data=data.frame( shade_cent=s , water_cent=-1:1 ,bed = 2) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+
+set.seed(7)
+prior <- extract.prior(m8.5_bed)
+
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.5_bed ,post = prior, data=data.frame( shade_cent=s , water_cent=-1:1 , bed = 2) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+```
+
+### Posterior predictions
+
+```{r}
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.4_bed , data=data.frame( shade_cent=s , water_cent=-1:1 , bed = 2) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( s in -1:1 ) {
+idx <- which( d$shade_cent==s )
+plot( d$water_cent[idx] , d$blooms_std[idx] , xlim=c(-1,1) , ylim=c(0,1) ,
+xlab="water" , ylab="blooms" , pch=16 , col=rangi2 )
+mu <- link( m8.5_bed , data=data.frame( shade_cent=s , water_cent=-1:1 , bed = 2) )
+for ( i in 1:20 ) lines( -1:1 , mu[i,] , col=col.alpha("black",0.3) )
+}
+```
+
+## 8H2
+
+```{r}
+compare(m8.5,m8.5_bed)
+
+precis(m8.5_bed, depth = 2)
+```
+
+The estimates are quite similar - only bed 1 is slightly lower in terms of bloom production. The WAIC values are also very similar - so adding bed doesn't increase the predictive accuracy of the model enough to overcome the parameter penalty.
+
+## 8H3
+
+```{r}
+library(rethinking)
+data(rugged)
+d <- rugged
+# make log version of outcome
+d$log_gdp <- log( d$rgdppc_2000 )
+# extract countries with GDP data
+dd <- d[ complete.cases(d$rgdppc_2000) , ]
+# rescale variables
+dd$log_gdp_std <- dd$log_gdp / mean(dd$log_gdp)
+dd$rugged_std <- dd$rugged / max(dd$rugged)
+
+# make variable to index Africa (1) or not (2)
+dd$cid <- ifelse( dd$cont_africa==1 , 1 , 2 )
+
+m8.3 <- quap(
+alist(
+log_gdp_std ~ dnorm( mu , sigma ) ,
+mu <- a[cid] + b[cid]*( rugged_std - 0.215 ) ,
+a[cid] ~ dnorm( 1 , 0.1 ) ,
+b[cid] ~ dnorm( 0 , 0.3 ) ,
+sigma ~ dexp( 1 )
+) , data=dd )
+
+set.seed(24071847)
+PSIS_m8.3 <- PSIS(m8.3,pointwise=TRUE) |> add_column(country = dd$country) |> arrange(desc(k))
+set.seed(24071847)
+WAIC_m8.3 <- WAIC(m8.3,pointwise=TRUE) |> add_column(country = dd$country) |> arrange(desc(penalty))
+plot( PSIS_m8.3$k , WAIC_m8.3$penalty , xlab="PSIS Pareto k" ,
+ylab="WAIC penalty" , col=rangi2 , lwd=2 )
+```
+
+### 8H3a
+
+It looks like Seychelles, Switzerland, and Lesotho are all influential outliers. 
+
+Seychelles and Switzerland have high ruggedness and high GDP while Lesotho has high ruggedness and low GDP.
+
+### 8H3b
+
+```{r}
+m8.3_student <- quap(
+alist(
+log_gdp_std ~ dstudent(nu = 2, mu , sigma ) ,
+mu <- a[cid] + b[cid]*( rugged_std - 0.215 ) ,
+a[cid] ~ dnorm( 1 , 0.1 ) ,
+b[cid] ~ dnorm( 0 , 0.3 ) ,
+sigma ~ dexp( 1 )
+) , data=dd )
+
+set.seed(24071847)
+PSIS_m8.3_student <- PSIS(m8.3_student,pointwise=TRUE) |> add_column(country = dd$country) |> arrange(desc(k))
+set.seed(24071847)
+WAIC_m8.3_student <- WAIC(m8.3_student,pointwise=TRUE) |> add_column(country = dd$country) |> arrange(desc(penalty))
+plot( PSIS_m8.3_student$k , WAIC_m8.3_student$penalty , xlab="PSIS Pareto k" ,
+ylab="WAIC penalty" , col=rangi2 , lwd=2 )
+
+# plot Africa - cid=1
+
+rugged.seq <- seq( from=-0.1 , to=1.1 , length.out=30 )
+d.A1 <- dd[ dd$cid==1 , ]
+plot( d.A1$rugged_std , d.A1$log_gdp_std , pch=16 , col=rangi2 ,
+xlab="ruggedness (standardized)" , ylab="log GDP (as proportion of mean)" ,
+xlim=c(0,1) )
+mu <- link( m8.3_student , data=data.frame( cid=1 , rugged_std=rugged.seq ) )
+mu_mean <- apply( mu , 2 , mean )
+mu_ci <- apply( mu , 2 , PI , prob=0.97 )
+lines( rugged.seq , mu_mean , lwd=2 )
+shade( mu_ci , rugged.seq , col=col.alpha(rangi2,0.3) )
+mtext("African nations")
+
+# plot non-Africa - cid=2
+d.A0 <- dd[ dd$cid==2 , ]
+plot( d.A0$rugged_std , d.A0$log_gdp_std , pch=1 , col="black" ,
+xlab="ruggedness (standardized)" , ylab="log GDP (as proportion of mean)" ,
+xlim=c(0,1) )
+mu <- link( m8.3_student , data=data.frame( cid=2 , rugged_std=rugged.seq ) )
+mu_mean <- apply( mu , 2 , mean )
+mu_ci <- apply( mu , 2 , PI , prob=0.97 )
+lines( rugged.seq , mu_mean , lwd=2 )
+shade( mu_ci , rugged.seq )
+mtext("Non-African nations")
+
+precis(m8.3_student, depth = 2)
+compare(m8.3,m8.3_student)
+```
+
+In my opinion the results have not substantially changed.
+
+### 8H4
+ 
+#### A. H = positive correlation language density & mean growing season length
+
+```{r}
+data(nettle)
+d <- nettle %>% 
+  mutate(lang.per.cap = num.lang/k.pop,
+         L = log(lang.per.cap) |> standardize(),
+         M_G = standardize(mean.growing.season),
+         S_G = sqrt(sd.growing.season) |> standardize(),
+         A = log(area/k.pop) |> standardize())
+
+m8h4 <- quap(
+  alist(
+    L ~ dnorm(mu,sigma),
+    mu <- a + bA * A + bM_G * M_G,
+    a ~ dnorm(0,.3), # standardized predictor so a should have mu = 0
+    bA ~ dnorm(.3,.5), # more area/capita should mean more languages. More area overall, without per cap scaling, meant fewer languages. Perhaps because a larger population means more cities/metropolitan exchange
+    bM_G ~ dnorm(.3,.5), # longer growing season should mean more languages, but I don't want the model to be overly sure of this since it's the main effect
+    sigma ~ dexp(1)
+  ), data = d
+)
+
+set.seed(7)
+prior <- extract.prior(m8h4)
+M_G_seq <- seq(min(d$M_G),max(d$M_G),length.out = 50)
+mu <- link( m8h4 ,post = prior, data=data.frame(M_G = M_G_seq,A = 0) )
+plot(M_G_seq,mu[1,],ylim = c(-2,2), type = "n")
+for ( i in 1:length(M_G_seq) ) lines( M_G_seq , mu[i,] , col=col.alpha("black",0.3) )
+
+precis(m8h4)
+
+set.seed(7)
+
+post <- link( m8h4, data=data.frame(M_G = M_G_seq,A = 0) )
+plot(L~M_G, data = d)
+mu <- apply(post, 2, mean)
+ci <- apply(post, 2, PI)
+lines(M_G_seq, mu)
+shade(ci, M_G_seq)
+
+```
+
+#### B. H = Negative correlation between language density and standard deviation in length of growing season
+
+```{r}
+data(nettle)
+d <- nettle %>% 
+  mutate(lang.per.cap = num.lang/k.pop,
+         L = log(lang.per.cap) |> standardize(),
+         M_G = standardize(mean.growing.season),
+         S_G = sqrt(sd.growing.season) |> standardize(),
+         A = log(area/k.pop) |> standardize())
+
+m8h4 <- quap(
+  alist(
+    L ~ dnorm(mu,sigma),
+    mu <- a + bA * A + bS_G * S_G,
+    a ~ dnorm(0,.3), # standardized predictor so a should have mu = 0
+    bA ~ dnorm(.3,.3), # more area/capita should mean more languages. More area overall, without per cap scaling, meant fewer languages. Perhaps because a larger population means more cities/metropolitan exchange
+    bS_G ~ dnorm(-.3,.3), # greater sd = fewer languages, but I don't want the model to be overly sure of this since it's the main effect
+    sigma ~ dexp(1)
+  ), data = d
+)
+
+set.seed(7)
+prior <- extract.prior(m8h4)
+S_G_seq <- seq(min(d$S_G),max(d$S_G),length.out = 50)
+mu <- link( m8h4 ,post = prior, data=data.frame(S_G = S_G_seq,A = 0) )
+plot(S_G_seq,mu[1,],ylim = c(-2,2), type = "n")
+for ( i in 1:length(S_G_seq) ) lines( S_G_seq , mu[i,] , col=col.alpha("black",0.3) )
+
+precis(m8h4)
+
+set.seed(7)
+
+post <- link( m8h4, data=data.frame(S_G = S_G_seq,A = 0) )
+plot(L~S_G, data = d)
+mu <- apply(post, 2, mean)
+ci <- apply(post, 2, PI)
+lines(S_G_seq, mu)
+shade(ci, S_G_seq)
+
+```
+
+#### C. H = Mean growing season and variance growing season synergistically reduce language diversity
+
+```{r}
+data(nettle)
+d <- nettle %>% 
+  mutate(lang.per.cap = num.lang/k.pop,
+         L = log(lang.per.cap) |> standardize(),
+         M_G = standardize(mean.growing.season),
+         S_G = sqrt(sd.growing.season) |> standardize(),
+         A = log(area/k.pop) |> standardize())
+
+m8h4 <- quap(
+  alist(
+    L ~ dnorm(mu,sigma),
+    mu <- a + bA * A + bS_G * S_G + bM_G * bM_G + bMS * S_G * M_G,
+    a ~ dnorm(0,.4), # standardized predictor so a should have mu = 0
+    bA ~ dnorm(.3,.2), # more area/capita should mean more languages. More area overall, without per cap scaling, meant fewer languages. Perhaps because a larger population means more cities/metropolitan exchange
+    bS_G ~ dnorm(-.2,.2), # greater sd = fewer languages, but I don't want the model to be overly sure of this since it's the main effect
+    bM_G ~ dnorm(.2,.2),
+    bMS ~ dnorm(0,.2),
+    sigma ~ dexp(.1)
+  ), data = d
+)
+
+set.seed(NULL)
+prior <- extract.prior(m8h4)
+S_G_seq <- seq(min(d$S_G),max(d$S_G),length.out = 20)
+m_levels <- quantile(d$M_G,c(.15,.5,.85))
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( i in m_levels ) {
+mu <- link( m8h4 ,post = prior, data=data.frame( M_G = i , S_G = S_G_seq, A = mean(d$A)) )
+plot(S_G_seq,seq(-2,2,length.out = length(S_G_seq)),type = "n", main = paste0("M = ",round(i)))
+for ( line in 1:length(S_G_seq) ) lines( S_G_seq , mu[line,] , col=col.alpha("black",0.3) )
+}
+
+set.seed(NULL)
+prior <- extract.prior(m8h4)
+M_G_seq <- seq(min(d$M_G),max(d$M_G),length.out = 20)
+s_levels <- quantile(d$S_G,c(.15,.5,.85))
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( i in m_levels ) {
+mu <- link( m8h4 ,post = prior, data=data.frame( S_G = i , M_G = M_G_seq, A = mean(d$A)) )
+plot(M_G_seq,seq(-2,2,length.out = length(M_G_seq)),type = "n", main = paste0("S = ",round(i)))
+for ( line in 1:length(M_G_seq) ) lines( M_G_seq , mu[line,] , col=col.alpha("black",0.3) )
+}
+
+precis(m8h4)
+
+S_G_seq <- seq(min(d$S_G),max(d$S_G),length.out = 20)
+m_levels <- quantile(d$M_G,c(.15,.5,.85))
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( i in m_levels ) {
+post <- link( m8h4 , data=data.frame( M_G = i , S_G = S_G_seq, A = mean(d$A)) )
+plot(L~S_G,type = "n",data = d, main = paste0("M = ",round(i)))
+mu <- apply(post,2,mean)
+ci <- apply(post,2,PI)
+for ( line in 1:length(S_G_seq) ) {
+  lines( S_G_seq , mu)
+  shade(ci,S_G_seq, col = col.alpha("lightgrey"))}
+}
+
+M_G_seq <- seq(min(d$M_G),max(d$M_G),length.out = 20)
+s_levels <- quantile(d$S_G,c(.15,.5,.85))
+par(mfrow=c(1,3)) # 3 plots in 1 row
+for ( i in s_levels ) {
+post <- link( m8h4 , data=data.frame( S_G = i , M_G = M_G_seq, A = mean(d$A)) )
+plot(L~M_G,type = "n",data = d, main = paste0("S = ",round(i)))
+mu <- apply(post,2,mean)
+ci <- apply(post,2,PI)
+for ( line in 1:length(M_G_seq) ) {
+  lines( M_G_seq , mu)
+  shade(ci,M_G_seq, col = col.alpha("lightgrey"))}
+}
+
+```
+
+
+It seems to me that there's good evidence that mean growing season length and variance of growing season length synergistically decrease language density.
+
+## 8H5
+
+```{r}
+data(Wines2012)
+d <- Wines2012 |>
+  mutate(score_std = standardize(score),
+         judge_idx = as.integer(judge),
+         wine_idx = as.integer(wine))
+
+m8h5 <- quap(
+  alist(
+    score_std ~ dnorm(mu,sigma),
+    mu <- j[judge_idx] + w[wine_idx],
+    j[judge_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how judge should change score. As is these priors keep the score within -2, 2.
+    w[wine_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how wine should change score.
+    sigma ~ dexp(1)
+  ), data = d
+)
+
+plot(precis(m8h5, depth = 2))
+precis(m8h5, depth = 2)
+
+m8h5 %>% 
+  precis(depth = 2) %>% 
+  as_tibble(rownames = "coefficient") %>% 
+  select(everything(), lower_pi = '5.5%',  upper_pi = '94.5%') %>% 
+  mutate(type = if_else(str_starts(coefficient, "j"), "judge", "wine"), 
+         coefficient = fct_reorder(coefficient, mean)) %>% 
+  filter(coefficient != "sigma") %>% 
+  ggplot(aes(x = mean, y = coefficient, colour = type)) +
+  geom_segment(aes(x = -1.25, xend = lower_pi, y = coefficient, yend = coefficient), 
+               colour = grey, linetype = "dashed", alpha = 0.7) +
+  geom_vline(xintercept = 0, colour = "lavender") +
+  geom_pointrange(aes(xmin = lower_pi, xmax = upper_pi), 
+                  size = 0.8) +
+  labs(y = NULL, x = "Coefficient estimate", colour = NULL) +
+  scale_colour_manual(values = c("red","purple"))# +
+  # scale_x_continuous(expand = c(0,0)) +
+  # theme_minimal() +
+  # theme(panel.grid = element_blank(), 
+  #       legend.position = c(0.85, 0.2))
+
+```
+
+Mean scores for wines and by judges seem very similar. Very few differences are obvious from these data.
+
+## 8H6
+
+```{r}
+data(Wines2012)
+d <- Wines2012 |>
+  mutate(score_std = standardize(score),
+         judge_idx = as.numeric(judge),
+         wine_idx = as.numeric(wine),
+         flight_idx = as.numeric(flight), #1 = red, 2= white
+         wine.amer_idx = if_else(wine.amer == 1,2,1),
+         judge.amer_idx = if_else(judge.amer == 1,2,1))
+
+m8h6 <- quap(
+  alist(
+    score_std ~ dnorm(mu,sigma),
+    mu <- a_f[flight_idx] + a_wa[wine.amer_idx] + a_ja[judge.amer_idx],
+    a_f[flight_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how judge should change score. As is these priors keep the score within -2, 2.
+    a_wa[wine.amer_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how wine should change score.
+    a_ja[judge.amer_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how wine should change score.
+    sigma ~ dexp(1)
+  ), data = d
+)
+
+plot(precis(m8h6, depth = 2))
+precis(m8h6, depth = 2)
+
+post <- extract.samples(m8h6)
+diff_a_f <- post$a_f[,1]-post$a_f[,2]
+PI(diff_a_f)
+diff_a_wa <- post$a_wa[,1]-post$a_wa[,2]
+PI(diff_a_wa)
+diff_a_ja <- post$a_ja[,1]-post$a_ja[,2]
+PI(diff_a_ja)
+
+```
+
+It looks like American judges give consistently higher scores than other judges.
+
+## 8H7
+
+```{r}
+data(Wines2012)
+d <- Wines2012 |>
+  mutate(score_std = standardize(score),
+         judge_idx = as.numeric(judge),
+         wine_idx = as.numeric(wine),
+         flight_idx = as.numeric(flight), #1 = red, 2= white
+         wine.amer_idx = if_else(wine.amer == 1,2,1),
+         judge.amer_idx = if_else(judge.amer == 1,2,1))
+
+m8h6 <- quap(
+  alist(
+    score ~ dnorm(mu,sigma),
+    mu <- a_f[flight_idx] + a_wa[wine.amer_idx] + a_ja[judge.amer_idx],
+    a_f[flight_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how judge should change score. As is these priors keep the score within -2, 2.
+    a_wa[wine.amer_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how wine should change score.
+    a_ja[judge.amer_idx] ~ dnorm(0,.5), # the score is standardized so these priors are pretty uninformative; but we don't have any a priori expectations about how wine should change score.
+    sigma ~ dexp(1)
+  ), data = d
+)
+
+plot(precis(m8h6, depth = 2))
+precis(m8h6, depth = 2)
+
+post <- extract.samples(m8h6)
+diff_a_f <- post$a_f[,1]-post$a_f[,2]
+PI(diff_a_f)
+diff_a_wa <- post$a_wa[,1]-post$a_wa[,2]
+PI(diff_a_wa)
+diff_a_ja <- post$a_ja[,1]-post$a_ja[,2]
+PI(diff_a_ja)
+
+```
+
+

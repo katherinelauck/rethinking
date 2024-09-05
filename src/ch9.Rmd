@@ -1,0 +1,13 @@
+---
+title: "Chapter 9"
+output: html_notebook
+---
+
+
+```{r setup}
+require(tidyverse)
+require(rethinking)
+require(dagitty)
+```
+
+
