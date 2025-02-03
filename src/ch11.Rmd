@@ -1,5 +1,5 @@
 ---
-title: "Chapter 9"
+title: "Chapter 11"
 output: html_notebook
 ---
 
@@ -8,6 +8,7 @@ output: html_notebook
 require(tidyverse)
 require(rethinking)
 require(dagitty)
+library(cmdstanr)
 ```
 
 ```{r}
@@ -120,4 +121,94 @@ post <- extract.samples(m11.4)
 mean( exp(post$b[,4]-post$b[,2]) )
 ```
 
+```{r}
+data(chimpanzees)
+d <- chimpanzees
+d$treatment <- 1 + d$prosoc_left + 2*d$condition
+d$side <- d$prosoc_left + 1 # right 1, left 2
+d$cond <- d$condition + 1 # no partner 1, partner 2
+d_aggregated <- aggregate(
+d$pulled_left ,
+list( treatment=d$treatment , actor=d$actor ,
+side=d$side , cond=d$cond ) ,
+sum )
+colnames(d_aggregated)[5] <- "left_pulls"
+str(d_aggregated)
+```
+
+```{r}
+dat <- with( d_aggregated , list(
+left_pulls = left_pulls,
+treatment = treatment,
+actor = actor,
+side = side,
+cond = cond ) )
+m11.6 <- ulam(
+alist(
+left_pulls ~ dbinom( 18 , p ) ,
+logit(p) <- a[actor] + b[treatment] ,
+a[actor] ~ dnorm( 0 , 1.5 ) ,
+b[treatment] ~ dnorm( 0 , 0.5 )
+) , data=dat , chains=4 , log_lik=TRUE )
+
+compare( m11.6 , m11.4 , func=PSIS )
+```
+
+```{r}
+library(rethinking)
+data(UCBadmit)
+d <- UCBadmit
+d
+
+dat_list <- list(
+admit = d$admit,
+applications = d$applications,
+gid = ifelse( d$applicant.gender=="male" , 1 , 2 )
+)
+m11.7 <- ulam(
+alist(
+admit ~ dbinom( applications , p ) ,
+logit(p) <- a[gid] ,
+a[gid] ~ dnorm( 0 , 1.5 )
+) , data=dat_list , chains=4 )
+precis( m11.7 , depth=2 )
+
+post <- extract.samples(m11.7)
+diff_a <- post$a[,1] - post$a[,2]
+diff_p <- inv_logit(post$a[,1]) - inv_logit(post$a[,2])
+precis( list( diff_a=diff_a , diff_p=diff_p ) )
+```
+
+```{r}
+postcheck( m11.7 )
+# draw lines connecting points from same dept
+for ( i in 1:6 ) {
+x <- 1 + 2*(i-1)
+y1 <- d$admit[x]/d$applications[x]
+y2 <- d$admit[x+1]/d$applications[x+1]
+lines( c(x,x+1) , c(y1,y2) , col=rangi2 , lwd=2 )
+text( x+0.5 , (y1+y2)/2 + 0.05 , d$dept[x] , cex=0.8 , col=rangi2 )
+}
+
+dat_list$dept_id <- rep(1:6,each=2)
+m11.8 <- ulam(
+alist(
+admit ~ dbinom( applications , p ) ,
+logit(p) <- a[gid] + delta[dept_id] ,
+a[gid] ~ dnorm( 0 , 1.5 ) ,
+delta[dept_id] ~ dnorm( 0 , 1.5 )
+) , data=dat_list , chains=4 , iter=4000 )
+precis( m11.8 , depth=2 )
+
+post <- extract.samples(m11.8)
+diff_a <- post$a[,1] - post$a[,2]
+diff_p <- inv_logit(post$a[,1]) - inv_logit(post$a[,2])
+precis( list( diff_a=diff_a , diff_p=diff_p ) )
+
+pg <- with( dat_list , sapply( 1:6 , function(k)
+applications[dept_id==k]/sum(applications[dept_id==k]) ) )
+rownames(pg) <- c("male","female")
+colnames(pg) <- unique(d$dept)
+round( pg , 2 )
+```
 

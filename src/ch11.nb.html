@@ -1754,160 +1754,1682 @@ display: none;
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxucmVxdWlyZSh0aWR5dmVyc2UpXG5gYGBcbmBgYCJ9 -->
-<pre class="r"><code>```r
-require(tidyverse)</code></pre>
-<pre><code>
-&lt;!-- rnb-source-end --&gt;
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVxdWlyZSh0aWR5dmVyc2UpXG5yZXF1aXJlKHJldGhpbmtpbmcpXG5yZXF1aXJlKGRhZ2l0dHkpXG5saWJyYXJ5KGNtZHN0YW5yKVxuYGBgIn0= -->
+<pre class="r"><code>require(tidyverse)
+require(rethinking)
+require(dagitty)
+library(cmdstanr)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YShjaGltcGFuemVlcylcbmQgPC0gY2hpbXBhbnplZXNcblxuZCR0cmVhdG1lbnQgPC0gMSArIGQkcHJvc29jX2xlZnQgKyAyKmQkY29uZGl0aW9uXG5cbnh0YWJzKCB+IHRyZWF0bWVudCArIHByb3NvY19sZWZ0ICsgY29uZGl0aW9uICwgZCApXG5gYGAifQ== -->
+<pre class="r"><code>data(chimpanzees)
+d &lt;- chimpanzees
 
-&lt;!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiB0aWR5dmVyc2VcbuKUgOKUgCBBdHRhY2hpbmcgY29yZSB0aWR5dmVyc2UgcGFja2FnZXMg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIHRpZHl2ZXJzZSAyLjAuMCDilIDilIBcbuKclCBkcGx5ciAgICAgMS4xLjQgICAgIOKclCByZWFkciAgICAgMi4xLjVcbuKclCBmb3JjYXRzICAgMS4wLjAgICAgIOKclCBzdHJpbmdyICAgMS41LjFcbuKclCBnZ3Bsb3QyICAgMy41LjEgICAgIOKclCB0aWJibGUgICAgMy4yLjFcbuKclCBsdWJyaWRhdGUgMS45LjMgICAgIOKclCB0aWR5ciAgICAgMS4zLjFcbuKclCBwdXJyciAgICAgMS4wLjIgICAgIOKUgOKUgCBDb25mbGljdHMg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAIHRpZHl2ZXJzZV9jb25mbGljdHMoKSDilIDilIBcbuKcliBkcGx5cjo6ZmlsdGVyKCkgbWFza3Mgc3RhdHM6OmZpbHRlcigpXG7inJYgZHBseXI6OmxhZygpICAgIG1hc2tzIHN0YXRzOjpsYWcoKVxu4oS5IFVzZSB0aGUgXHUwMDFiXTg7O2h0dHA6Ly9jb25mbGljdGVkLnItbGliLm9yZy9cdTAwMDdjb25mbGljdGVkIHBhY2thZ2VcdTAwMWJdODs7XHUwMDA3IHRvIGZvcmNlIGFsbCBjb25mbGljdHMgdG8gYmVjb21lIGVycm9yc1xuIn0= --&gt;
+d$treatment &lt;- 1 + d$prosoc_left + 2*d$condition
+
+xtabs( ~ treatment + prosoc_left + condition , d )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiLCAsIGNvbmRpdGlvbiA9IDBcblxuICAgICAgICAgcHJvc29jX2xlZnRcbnRyZWF0bWVudCAgIDAgICAxXG4gICAgICAgIDEgMTI2ICAgMFxuICAgICAgICAyICAgMCAxMjZcbiAgICAgICAgMyAgIDAgICAwXG4gICAgICAgIDQgICAwICAgMFxuXG4sICwgY29uZGl0aW9uID0gMVxuXG4gICAgICAgICBwcm9zb2NfbGVmdFxudHJlYXRtZW50ICAgMCAgIDFcbiAgICAgICAgMSAgIDAgICAwXG4gICAgICAgIDIgICAwICAgMFxuICAgICAgICAzIDEyNiAgIDBcbiAgICAgICAgNCAgIDAgMTI2XG4ifQ== -->
+<pre><code>, , condition = 0
+
+         prosoc_left
+treatment   0   1
+        1 126   0
+        2   0 126
+        3   0   0
+        4   0   0
+
+, , condition = 1
+
+         prosoc_left
+treatment   0   1
+        1   0   0
+        2   0   0
+        3 126   0
+        4   0 126</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubTExLjEgPC0gcXVhcChcbmFsaXN0KFxucHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLFxubG9naXQocCkgPC0gYSAsXG5hIH4gZG5vcm0oIDAgLCAxLjUgKVxuKSAsIGRhdGE9ZCApXG5cbnNldC5zZWVkKDE5OTkpXG5wcmlvciA8LSBleHRyYWN0LnByaW9yKCBtMTEuMSAsIG49MWU0IClcblxucCA8LSBpbnZfbG9naXQoIHByaW9yJGEgKVxuZGVucyggcCAsIGFkaj0wLjEgKVxuYGBgIn0= -->
+<pre class="r"><code>m11.1 &lt;- quap(
+alist(
+pulled_left ~ dbinom( 1 , p ) ,
+logit(p) &lt;- a ,
+a ~ dnorm( 0 , 1.5 )
+) , data=d )
+
+set.seed(1999)
+prior &lt;- extract.prior( m11.1 , n=1e4 )
+
+p &lt;- inv_logit( prior$a )
+dens( p , adj=0.1 )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjQzMi42MzI5LCJ3aWR0aCI6NzAwLCJkcGkiOi0xLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5tMTEuMiA8LSBxdWFwKFxuYWxpc3QoXG5wdWxsZWRfbGVmdCB+IGRiaW5vbSggMSAsIHAgKSAsXG5sb2dpdChwKSA8LSBhICsgYlt0cmVhdG1lbnRdICxcbmEgfiBkbm9ybSggMCAsIDEuNSApLFxuYlt0cmVhdG1lbnRdIH4gZG5vcm0oIDAgLCAxMCApXG4pICwgZGF0YT1kIClcbnNldC5zZWVkKDE5OTkpXG5wcmlvciA8LSBleHRyYWN0LnByaW9yKCBtMTEuMiAsIG49MWU0IClcbnAgPC0gc2FwcGx5KCAxOjQgLCBmdW5jdGlvbihrKSBpbnZfbG9naXQoIHByaW9yJGEgKyBwcmlvciRiWyxrXSApIClcblxuZGVucyggYWJzKCBwWywxXSAtIHBbLDJdICkgLCBhZGo9MC4xIClcbmBgYCJ9 -->
+<pre class="r"><code>
+m11.2 &lt;- quap(
+alist(
+pulled_left ~ dbinom( 1 , p ) ,
+logit(p) &lt;- a + b[treatment] ,
+a ~ dnorm( 0 , 1.5 ),
+b[treatment] ~ dnorm( 0 , 10 )
+) , data=d )
+set.seed(1999)
+prior &lt;- extract.prior( m11.2 , n=1e4 )
+p &lt;- sapply( 1:4 , function(k) inv_logit( prior$a + prior$b[,k] ) )
+
+dens( abs( p[,1] - p[,2] ) , adj=0.1 )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjQzMi42MzI5LCJ3aWR0aCI6NzAwLCJkcGkiOi0xLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5tMTEuMyA8LSBxdWFwKFxuYWxpc3QoXG5wdWxsZWRfbGVmdCB+IGRiaW5vbSggMSAsIHAgKSAsXG5sb2dpdChwKSA8LSBhICsgYlt0cmVhdG1lbnRdICxcbmEgfiBkbm9ybSggMCAsIDEuNSApLFxuYlt0cmVhdG1lbnRdIH4gZG5vcm0oIDAgLCAwLjUgKVxuKSAsIGRhdGE9ZCApXG5zZXQuc2VlZCgxOTk5KVxucHJpb3IgPC0gZXh0cmFjdC5wcmlvciggbTExLjMgLCBuPTFlNCApXG5wIDwtIHNhcHBseSggMTo0ICwgZnVuY3Rpb24oaykgaW52X2xvZ2l0KCBwcmlvciRhICsgcHJpb3IkYlssa10gKSApXG5tZWFuKCBhYnMoIHBbLDFdIC0gcFssMl0gKSApXG5gYGAifQ== -->
+<pre class="r"><code>
+m11.3 &lt;- quap(
+alist(
+pulled_left ~ dbinom( 1 , p ) ,
+logit(p) &lt;- a + b[treatment] ,
+a ~ dnorm( 0 , 1.5 ),
+b[treatment] ~ dnorm( 0 , 0.5 )
+) , data=d )
+set.seed(1999)
+prior &lt;- extract.prior( m11.3 , n=1e4 )
+p &lt;- sapply( 1:4 , function(k) inv_logit( prior$a + prior$b[,k] ) )
+mean( abs( p[,1] - p[,2] ) )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMDk4Mzg2NjNcbiJ9 -->
+<pre><code>[1] 0.09838663</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGVucyggYWJzKCBwWywxXSAtIHBbLDJdICkgLCBhZGo9MC4xIClcblxuYGBgIn0= -->
+<pre class="r"><code>dens( abs( p[,1] - p[,2] ) , adj=0.1 )
 </code></pre>
-<p>Loading required package: tidyverse ── Attaching core tidyverse
-packages
-────────────────────────────────────────────────────────────────────────────────────
-tidyverse 2.0.0 ── ✔ dplyr 1.1.4 ✔ readr 2.1.5 ✔ forcats 1.0.0 ✔ stringr
-1.5.1 ✔ ggplot2 3.5.1 ✔ tibble 3.2.1 ✔ lubridate 1.9.3 ✔ tidyr 1.3.1 ✔
-purrr 1.0.2 ── Conflicts
-──────────────────────────────────────────────────────────────────────────────────────────────────────
-tidyverse_conflicts() ── ✖ dplyr::filter() masks stats::filter() ✖
-dplyr::lag() masks stats::lag() ℹ Use the ]8;;<a href="http://conflicted.r-lib.org/conflicted" class="uri">http://conflicted.r-lib.org/conflicted</a> package]8;; to
-force all conflicts to become errors</p>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjQzMi42MzI5LCJ3aWR0aCI6NzAwLCJkcGkiOi0xLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBwcmlvciB0cmltbWVkIGRhdGEgbGlzdCAxMS4xMFxuZGF0X2xpc3QgPC0gbGlzdChcbnB1bGxlZF9sZWZ0ID0gZCRwdWxsZWRfbGVmdCxcbmFjdG9yID0gZCRhY3RvcixcbnRyZWF0bWVudCA9IGFzLmludGVnZXIoZCR0cmVhdG1lbnQpIClcblxubTExLjQgPC0gdWxhbShcbmFsaXN0KFxucHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLFxubG9naXQocCkgPC0gYVthY3Rvcl0gKyBiW3RyZWF0bWVudF0gLFxuYVthY3Rvcl0gfiBkbm9ybSggMCAsIDEuNSApLFxuYlt0cmVhdG1lbnRdIH4gZG5vcm0oIDAgLCAwLjUgKVxuKSAsIGRhdGE9ZGF0X2xpc3QgLCBjaGFpbnM9NCAsIGxvZ19saWs9VFJVRSApXG5gYGAifQ== -->
+<pre class="r"><code># prior trimmed data list 11.10
+dat_list &lt;- list(
+pulled_left = d$pulled_left,
+actor = d$actor,
+treatment = as.integer(d$treatment) )
+
+m11.4 &lt;- ulam(
+alist(
+pulled_left ~ dbinom( 1 , p ) ,
+logit(p) &lt;- a[actor] + b[treatment] ,
+a[actor] ~ dnorm( 0 , 1.5 ),
+b[treatment] ~ dnorm( 0 , 0.5 )
+) , data=dat_list , chains=4 , log_lik=TRUE )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29tcGlsaW5nIFN0YW4gcHJvZ3JhbS4uLlxuIn0= -->
+<pre><code>Compiling Stan program...</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG4ifQ== -->
 <pre><code>
+-
 
+\
 
-&lt;!-- rnb-output-end --&gt;
+|
 
-&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxucmVxdWlyZShyZXRoaW5raW5nKVxuYGBgXG5gYGAifQ== --&gt;
+/
 
-```r
-```r
-require(rethinking)</code></pre>
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSW4gZmlsZSBpbmNsdWRlZCBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi90YmJfcHJvZmlsaW5nLmg6MTIzLFxuICAgICAgICAgICAgICAgICBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi90YXNrLmg6MzYsXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL3Rhc2tfYXJlbmEuaDoyMyxcbiAgICAgICAgICAgICAgICAgZnJvbSBzdGFuL2xpYi9zdGFuX21hdGgvc3Rhbi9tYXRoL3ByaW0vY29yZS9pbml0X3RocmVhZHBvb2xfdGJiLmhwcDoxOCxcbiAgICAgICAgICAgICAgICAgZnJvbSBzcmMvY21kc3Rhbi9hcmd1bWVudHMvYXJnX251bV90aHJlYWRzLmhwcDo1LFxuICAgICAgICAgICAgICAgICBmcm9tIHNyYy9jbWRzdGFuL2NvbW1hbmQuaHBwOjgsXG4gICAgICAgICAgICAgICAgIGZyb20gc3JjL2NtZHN0YW4vbWFpbi5jcHA6MTpcbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0MjI6MjQ6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDIyIHwgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiBpbnRlcm5hbDo6YXRvbWljX2ltcGw8VD4ocmhzKSB7fVxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgIF5cbiJ9 -->
+<pre><code>In file included from stan/lib/stan_math/lib/tbb_2020.3/include/tbb/tbb_profiling.h:123,
+                 from stan/lib/stan_math/lib/tbb_2020.3/include/tbb/task.h:36,
+                 from stan/lib/stan_math/lib/tbb_2020.3/include/tbb/task_arena.h:23,
+                 from stan/lib/stan_math/stan/math/prim/core/init_threadpool_tbb.hpp:18,
+                 from src/cmdstan/arguments/arg_num_threads.hpp:5,
+                 from src/cmdstan/command.hpp:8,
+                 from src/cmdstan/main.cpp:1:
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:422:24: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  422 |     constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs): internal::atomic_impl&lt;T&gt;(rhs) {}
+      |                        ^</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cXFxuIn0= -->
 <pre><code>
-&lt;!-- rnb-source-end --&gt;
+\</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoic3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQyMjoyNDogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTQ6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU0IHwgX19UQkJfREVDTF9BVE9NSUMoX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTQ6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU0IHwgX19UQkJfREVDTF9BVE9NSUMoX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTU6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU1IHwgX19UQkJfREVDTF9BVE9NSUModW5zaWduZWQgX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTU6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU1IHwgX19UQkJfREVDTF9BVE9NSUModW5zaWduZWQgX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrK1xuIn0= -->
+<pre><code>stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:422:24: note: remove the &#39;&lt; &gt;&#39;
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:454:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  454 | __TBB_DECL_ATOMIC(__TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:454:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  454 | __TBB_DECL_ATOMIC(__TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:455:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  455 | __TBB_DECL_ATOMIC(unsigned __TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:455:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  455 | __TBB_DECL_ATOMIC(unsigned __TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG58XG4ifQ== -->
+<pre><code>
+|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiMjAgWy1XdGVtcGxhdGUtaWQtY2R0b3JdXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ1OToxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0NTkgfCBfX1RCQl9ERUNMX0FUT01JQyhsb25nKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTk6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU5IHwgX19UQkJfREVDTF9BVE9NSUMobG9uZylcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDYwOjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ2MCB8IF9fVEJCX0RFQ0xfQVRPTUlDKHVuc2lnbmVkIGxvbmcpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ2MDoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0NjAgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZCBsb25nKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTE6MTogbm90ZTogaW4gZVxuIn0= -->
+<pre><code>20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:459:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  459 | __TBB_DECL_ATOMIC(long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:459:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  459 | __TBB_DECL_ATOMIC(long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:460:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  460 | __TBB_DECL_ATOMIC(unsigned long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:460:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  460 | __TBB_DECL_ATOMIC(unsigned long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:491:1: note: in e</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4vXG4ifQ== -->
+<pre><code>
+/</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoieHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTEgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IG5vdGU6IHJlbW92ZSB0aGUgJzwgPidcbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDkxOjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ5MSB8IF9fVEJCX0RFQ0xfQVRPTUlDKHVuc2lnbmVkKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuIn0= -->
+<pre><code>xpansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  491 | __TBB_DECL_ATOMIC(unsigned)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:491:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  491 | __TBB_DECL_ATOMIC(unsigned)
+      | ^~~~~~~~~~~~~~~~~</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4tXG4ifQ== -->
+<pre><code>
+-</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoic3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDkyIHwgX19UQkJfREVDTF9BVE9NSUMoaW50KVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDkyIHwgX19UQkJfREVDTF9BVE9NSUMoaW50KVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTU6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDk1IHwgX19UQkJfREVDTF9BVE9NSUModW5zaWduZWQgc2hvcnQpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5NToxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTUgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZCBzaG9ydClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIn0= -->
+<pre><code>stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:492:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  492 | __TBB_DECL_ATOMIC(int)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:492:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  492 | __TBB_DECL_ATOMIC(int)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:495:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  495 | __TBB_DECL_ATOMIC(unsigned short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:495:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  495 | __TBB_DECL_ATOMIC(unsigned short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                           </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cXFxuIn0= -->
+<pre><code>
+\</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTY6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDk2IHwgX19UQkJfREVDTF9BVE9NSUMoc2hvcnQpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5NjoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTYgfCBfX1RCQl9ERUNMX0FUT01JQyhzaG9ydClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDk3OjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ5NyB8IF9fVEJCX0RFQ0xfQVRPTUlDKGNoYXIpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5NzoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTcgfCBfX1RCQl9ERUNMX0FUT01JQyhjaGFyKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTg6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDk4IHwgX19UQkJfREVDTF9BVE9NSUMoc2lnbmVkIGNoYXIpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90XG4ifQ== -->
+<pre><code>   \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:496:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  496 | __TBB_DECL_ATOMIC(short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:496:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  496 | __TBB_DECL_ATOMIC(short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:497:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  497 | __TBB_DECL_ATOMIC(char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:497:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  497 | __TBB_DECL_ATOMIC(char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:498:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  498 | __TBB_DECL_ATOMIC(signed char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/t</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG58XG4ifQ== -->
+<pre><code>
+|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiYmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5ODoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTggfCBfX1RCQl9ERUNMX0FUT01JQyhzaWduZWQgY2hhcilcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDk5OjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ5OSB8IF9fVEJCX0RFQ0xfQVRPTUlDKHVuc2lnbmVkIGNoYXIpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5OToxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTkgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZCBjaGFyKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo1MDI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNTAyIHwgX19UQkJfREVDTF9BVE9NSUMod2NoYXJfdClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IG5vdGU6IHJlbW92ZSB0aGUgJzwgPidcbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YlxuIn0= -->
+<pre><code>bb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:498:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  498 | __TBB_DECL_ATOMIC(signed char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:499:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  499 | __TBB_DECL_ATOMIC(unsigned char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:499:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  499 | __TBB_DECL_ATOMIC(unsigned char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:502:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  502 | __TBB_DECL_ATOMIC(wchar_t)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tb</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4vXG4ifQ== -->
+<pre><code>
+/</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiYi9hdG9taWMuaDo1MDI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNTAyIHwgX19UQkJfREVDTF9BVE9NSUMod2NoYXJfdClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbiJ9 -->
+<pre><code>b/atomic.h:502:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  502 | __TBB_DECL_ATOMIC(wchar_t)
+      | ^~~~~~~~~~~~~~~~~</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG4ifQ== -->
+<pre><code>
+-
 
-&lt;!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiByZXRoaW5raW5nXG5Mb2FkaW5nIHJlcXVpcmVkIHBhY2thZ2U6IGNtZHN0YW5yXG5UaGlzIGlzIGNtZHN0YW5yIHZlcnNpb24gMC44LjFcbi0gQ21kU3RhblIgZG9jdW1lbnRhdGlvbiBhbmQgdmlnbmV0dGVzOiBtYy1zdGFuLm9yZy9jbWRzdGFuclxuLSBDbWRTdGFuIHBhdGg6IEM6L1VzZXJzL2thdGhlLy5jbWRzdGFuL2NtZHN0YW4tMi4zNS4wXG4tIENtZFN0YW4gdmVyc2lvbjogMi4zNS4wXG5cbkEgbmV3ZXIgdmVyc2lvbiBvZiBDbWRTdGFuIGlzIGF2YWlsYWJsZS4gU2VlID9pbnN0YWxsX2NtZHN0YW4oKSB0byBpbnN0YWxsIGl0LlxuVG8gZGlzYWJsZSB0aGlzIGNoZWNrIHNldCBvcHRpb24gb3IgZW52aXJvbm1lbnQgdmFyaWFibGUgY21kc3RhbnJfbm9fdmVyX2NoZWNrPVRSVUUuXG5Mb2FkaW5nIHJlcXVpcmVkIHBhY2thZ2U6IHBvc3RlcmlvclxuVGhpcyBpcyBwb3N0ZXJpb3IgdmVyc2lvbiAxLjYuMFxuXG5BdHRhY2hpbmcgcGFja2FnZTog4oCYcG9zdGVyaW9y4oCZXG5cblRoZSBmb2xsb3dpbmcgb2JqZWN0cyBhcmUgbWFza2VkIGZyb20g4oCYcGFja2FnZTpzdGF0c+KAmTpcblxuICAgIG1hZCwgc2QsIHZhclxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6YmFzZeKAmTpcblxuICAgICVpbiUsIG1hdGNoXG5cbkxvYWRpbmcgcmVxdWlyZWQgcGFja2FnZTogcGFyYWxsZWxcbnJldGhpbmtpbmcgKFZlcnNpb24gMi40MilcblxuQXR0YWNoaW5nIHBhY2thZ2U6IOKAmHJldGhpbmtpbmfigJlcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpwdXJycuKAmTpcblxuICAgIG1hcFxuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDigJhwYWNrYWdlOnN0YXRz4oCZOlxuXG4gICAgcnN0dWRlbnRcbiJ9 --&gt;
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSW4gZmlsZSBpbmNsdWRlZCBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9zdGFuL21hdGgvcHJpbS9wcm9iL3N0ZF9ub3JtYWxfY2NkZl9sb2cuaHBwOjUsXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9saWIvc3Rhbl9tYXRoL3N0YW4vbWF0aC9wcmltL3Byb2IuaHBwOjI3NixcbiAgICAgICAgICAgICAgICAgZnJvbSBzdGFuL2xpYi9zdGFuX21hdGgvc3Rhbi9tYXRoL3ByaW0uaHBwOjE4LFxuICAgICAgICAgICAgICAgICBmcm9tIHN0YW4vc3JjL3N0YW4vaW8vZHVtcC5ocHA6NyxcbiAgICAgICAgICAgICAgICAgZnJvbSBzcmMvY21kc3Rhbi9jb21tYW5kX2hlbHBlci5ocHA6MTAsXG4gICAgICAgICAgICAgICAgIGZyb20gc3JjL2NtZHN0YW4vY29tbWFuZC5ocHA6MTM6XG5zdGFuL2xpYi9zdGFuX21hdGgvc3Rhbi9tYXRoL3ByaW0vcHJvYi9zdGRfbm9ybWFsX2xjY2RmLmhwcDogSW4gZnVuY3Rpb24gJ3N0YW46OnJldHVybl90eXBlX3Q8VD4gc3Rhbjo6bWF0aDo6c3RkX25vcm1hbF9sY2NkZihjb25zdCBUX3kmKSc6XG5zdGFuL2xpYi9zdGFuX21hdGgvc3Rhbi9tYXRoL3ByaW0vcHJvYi9zdGRfbm9ybWFsX2xjY2RmLmhwcDo1Mjogbm90ZTogJy1XbWlzbGVhZGluZy1pbmRlbnRhdGlvbicgaXMgZGlzYWJsZWQgZnJvbSB0aGlzIHBvaW50IG9ud2FyZHMsIHNpbmNlIGNvbHVtbi10cmFja2luZyB3YXMgZGlzYWJsZWQgZHVlIHRvIHRoZSBzaXplIG9mIHRoZSBjb2RlL2hlYWRlcnNcbiAgIDUyIHwgICAgIH0gZWxzZSBpZiAoeV9kYmwgPiA4LjI1KSB7XG4ifQ== -->
+<pre><code>In file included from stan/lib/stan_math/stan/math/prim/prob/std_normal_ccdf_log.hpp:5,
+                 from stan/lib/stan_math/stan/math/prim/prob.hpp:276,
+                 from stan/lib/stan_math/stan/math/prim.hpp:18,
+                 from stan/src/stan/io/dump.hpp:7,
+                 from src/cmdstan/command_helper.hpp:10,
+                 from src/cmdstan/command.hpp:13:
+stan/lib/stan_math/stan/math/prim/prob/std_normal_lccdf.hpp: In function &#39;stan::return_type_t&lt;T&gt; stan::math::std_normal_lccdf(const T_y&amp;)&#39;:
+stan/lib/stan_math/stan/math/prim/prob/std_normal_lccdf.hpp:52: note: &#39;-Wmisleading-indentation&#39; is disabled from this point onwards, since column-tracking was disabled due to the size of the code/headers
+   52 |     } else if (y_dbl &gt; 8.25) {</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG58XG4ifQ== -->
+<pre><code>
+|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoic3Rhbi9saWIvc3Rhbl9tYXRoL3N0YW4vbWF0aC9wcmltL3Byb2Ivc3RkX25vcm1hbF9sY2NkZi5ocHA6NTI6IG5vdGU6IGFkZGluZyAnLWZsYXJnZS1zb3VyY2UtZmlsZXMnIHdpbGwgYWxsb3cgZm9yIG1vcmUgY29sdW1uLXRyYWNraW5nIHN1cHBvcnQsIGF0IHRoZSBleHBlbnNlIG9mIGNvbXBpbGF0aW9uIHRpbWUgYW5kIG1lbW9yeVxuIn0= -->
+<pre><code>stan/lib/stan_math/stan/math/prim/prob/std_normal_lccdf.hpp:52: note: adding &#39;-flarge-source-files&#39; will allow for more column-tracking support, at the expense of compilation time and memory</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcbiJ9 -->
+<pre><code>
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSW4gZmlsZSBpbmNsdWRlZCBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi90YXNrX3NjaGVkdWxlcl9vYnNlcnZlci5oOjIzLFxuICAgICAgICAgICAgICAgICBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9zdGFuL21hdGgvcmV2L2NvcmUvaW5pdF9jaGFpbmFibGVzdGFjay5ocHA6NixcbiAgICAgICAgICAgICAgICAgZnJvbSBzdGFuL2xpYi9zdGFuX21hdGgvc3Rhbi9tYXRoL3Jldi9jb3JlLmhwcDoxNCxcbiAgICAgICAgICAgICAgICAgZnJvbSBzdGFuL3NyYy9zdGFuL21vZGVsL21vZGVsX2Jhc2UuaHBwOjgsXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9zcmMvc3Rhbi9tb2RlbC9tb2RlbF9oZWFkZXIuaHBwOjQ6XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDIyOjI0OiB3YXJuaW5nOiB0ZW1wbGF0ZS1pZCBub3QgYWxsb3dlZCBmb3IgY29uc3RydWN0b3IgaW4gQysrMjAgWy1XdGVtcGxhdGUtaWQtY2R0b3JdXG4gIDQyMiB8ICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogaW50ZXJuYWw6OmF0b21pY19pbXBsPFQ+KHJocykge31cbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICBeXG4ifQ== -->
+<pre><code>In file included from stan/lib/stan_math/lib/tbb_2020.3/include/tbb/task_scheduler_observer.h:23,
+                 from stan/lib/stan_math/stan/math/rev/core/init_chainablestack.hpp:6,
+                 from stan/lib/stan_math/stan/math/rev/core.hpp:14,
+                 from stan/src/stan/model/model_base.hpp:8,
+                 from stan/src/stan/model/model_header.hpp:4:
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:422:24: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  422 |     constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs): internal::atomic_impl&lt;T&gt;(rhs) {}
+      |                        ^</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG58XG4ifQ== -->
+<pre><code>
+|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoic3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQyMjoyNDogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTQ6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU0IHwgX19UQkJfREVDTF9BVE9NSUMoX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTQ6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU0IHwgX19UQkJfREVDTF9BVE9NSUMoX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTU6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU1IHwgX19UQkJfREVDTF9BVE9NSUModW5zaWduZWQgX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTU6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU1IHwgX19UQkJfREVDTF9BVE9NSUModW5zaWduZWQgX19UQkJfTE9OR19MT05HKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrK1xuIn0= -->
+<pre><code>stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:422:24: note: remove the &#39;&lt; &gt;&#39;
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:454:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  454 | __TBB_DECL_ATOMIC(__TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:454:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  454 | __TBB_DECL_ATOMIC(__TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:455:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  455 | __TBB_DECL_ATOMIC(unsigned __TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:455:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  455 | __TBB_DECL_ATOMIC(unsigned __TBB_LONG_LONG)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4vXG4ifQ== -->
+<pre><code>
+/</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiMjAgWy1XdGVtcGxhdGUtaWQtY2R0b3JdXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ1OToxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0NTkgfCBfX1RCQl9ERUNMX0FUT01JQyhsb25nKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0NTk6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDU5IHwgX19UQkJfREVDTF9BVE9NSUMobG9uZylcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDYwOjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ2MCB8IF9fVEJCX0RFQ0xfQVRPTUlDKHVuc2lnbmVkIGxvbmcpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ2MDoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0NjAgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZCBsb25nKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTE6MTogbm90ZTogaW4gZVxuIn0= -->
+<pre><code>20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:459:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  459 | __TBB_DECL_ATOMIC(long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:459:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  459 | __TBB_DECL_ATOMIC(long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:460:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  460 | __TBB_DECL_ATOMIC(unsigned long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:460:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  460 | __TBB_DECL_ATOMIC(unsigned long)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:491:1: note: in e</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4tXG4ifQ== -->
+<pre><code>
+-</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoieHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTEgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IG5vdGU6IHJlbW92ZSB0aGUgJzwgPidcbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDkxOjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ5MSB8IF9fVEJCX0RFQ0xfQVRPTUlDKHVuc2lnbmVkKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuIn0= -->
+<pre><code>xpansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  491 | __TBB_DECL_ATOMIC(unsigned)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:491:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  491 | __TBB_DECL_ATOMIC(unsigned)
+      | ^~~~~~~~~~~~~~~~~</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cXFxuIn0= -->
+<pre><code>
+\</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoic3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDkyIHwgX19UQkJfREVDTF9BVE9NSUMoaW50KVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogbm90ZTogcmVtb3ZlIHRoZSAnPCA+J1xuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDkyIHwgX19UQkJfREVDTF9BVE9NSUMoaW50KVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTU6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDk1IHwgX19UQkJfREVDTF9BVE9NSUModW5zaWduZWQgc2hvcnQpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5NToxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTUgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZCBzaG9ydClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIn0= -->
+<pre><code>stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:492:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  492 | __TBB_DECL_ATOMIC(int)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:492:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  492 | __TBB_DECL_ATOMIC(int)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:495:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  495 | __TBB_DECL_ATOMIC(unsigned short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:495:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  495 | __TBB_DECL_ATOMIC(unsigned short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                           </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG58XG4ifQ== -->
+<pre><code>
+|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTY6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDk2IHwgX19UQkJfREVDTF9BVE9NSUMoc2hvcnQpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5NjoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTYgfCBfX1RCQl9ERUNMX0FUT01JQyhzaG9ydClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDk3OjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ5NyB8IF9fVEJCX0RFQ0xfQVRPTUlDKGNoYXIpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5NzoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTcgfCBfX1RCQl9ERUNMX0FUT01JQyhjaGFyKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0OTg6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNDk4IHwgX19UQkJfREVDTF9BVE9NSUMoc2lnbmVkIGNoYXIpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90XG4ifQ== -->
+<pre><code>   \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:496:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  496 | __TBB_DECL_ATOMIC(short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:496:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  496 | __TBB_DECL_ATOMIC(short)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:497:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  497 | __TBB_DECL_ATOMIC(char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:497:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  497 | __TBB_DECL_ATOMIC(char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:498:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  498 | __TBB_DECL_ATOMIC(signed char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/t</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4vXG4ifQ== -->
+<pre><code>
+/</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiYmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5ODoxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTggfCBfX1RCQl9ERUNMX0FUT01JQyhzaWduZWQgY2hhcilcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IHdhcm5pbmc6IHRlbXBsYXRlLWlkIG5vdCBhbGxvd2VkIGZvciBjb25zdHJ1Y3RvciBpbiBDKysyMCBbLVd0ZW1wbGF0ZS1pZC1jZHRvcl1cbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDk5OjE6IG5vdGU6IGluIGV4cGFuc2lvbiBvZiBtYWNybyAnX19UQkJfREVDTF9BVE9NSUMnXG4gIDQ5OSB8IF9fVEJCX0RFQ0xfQVRPTUlDKHVuc2lnbmVkIGNoYXIpXG4gICAgICB8IF5+fn5+fn5+fn5+fn5+fn5+XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YmIvYXRvbWljLmg6NDM3OjMyOiBub3RlOiByZW1vdmUgdGhlICc8ID4nXG4gIDQzNyB8ICAgICAgICAgICAgIGNvbnN0ZXhwciBhdG9taWM8VD4oY29uc3QgYXRvbWljPFQ+JiByaHMpOiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcXFxuICAgICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQ5OToxOiBub3RlOiBpbiBleHBhbnNpb24gb2YgbWFjcm8gJ19fVEJCX0RFQ0xfQVRPTUlDJ1xuICA0OTkgfCBfX1RCQl9ERUNMX0FUT01JQyh1bnNpZ25lZCBjaGFyKVxuICAgICAgfCBefn5+fn5+fn5+fn5+fn5+flxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi90YmJfMjAyMC4zL2luY2x1ZGUvdGJiL2F0b21pYy5oOjQzNzozMjogd2FybmluZzogdGVtcGxhdGUtaWQgbm90IGFsbG93ZWQgZm9yIGNvbnN0cnVjdG9yIGluIEMrKzIwIFstV3RlbXBsYXRlLWlkLWNkdG9yXVxuICA0MzcgfCAgICAgICAgICAgICBjb25zdGV4cHIgYXRvbWljPFQ+KGNvbnN0IGF0b21pYzxUPiYgcmhzKTogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXFxcbiAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo1MDI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNTAyIHwgX19UQkJfREVDTF9BVE9NSUMod2NoYXJfdClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbnN0YW4vbGliL3N0YW5fbWF0aC9saWIvdGJiXzIwMjAuMy9pbmNsdWRlL3RiYi9hdG9taWMuaDo0Mzc6MzI6IG5vdGU6IHJlbW92ZSB0aGUgJzwgPidcbiAgNDM3IHwgICAgICAgICAgICAgY29uc3RleHByIGF0b21pYzxUPihjb25zdCBhdG9taWM8VD4mIHJocyk6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxcXG4gICAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL3RiYl8yMDIwLjMvaW5jbHVkZS90YlxuIn0= -->
+<pre><code>bb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:498:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  498 | __TBB_DECL_ATOMIC(signed char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:499:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  499 | __TBB_DECL_ATOMIC(unsigned char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:499:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  499 | __TBB_DECL_ATOMIC(unsigned char)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: warning: template-id not allowed for constructor in C++20 [-Wtemplate-id-cdtor]
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:502:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  502 | __TBB_DECL_ATOMIC(wchar_t)
+      | ^~~~~~~~~~~~~~~~~
+stan/lib/stan_math/lib/tbb_2020.3/include/tbb/atomic.h:437:32: note: remove the &#39;&lt; &gt;&#39;
+  437 |             constexpr atomic&lt;T&gt;(const atomic&lt;T&gt;&amp; rhs):                                              \
+      |                                ^
+stan/lib/stan_math/lib/tbb_2020.3/include/tb</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4tXG4ifQ== -->
+<pre><code>
+-</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiYi9hdG9taWMuaDo1MDI6MTogbm90ZTogaW4gZXhwYW5zaW9uIG9mIG1hY3JvICdfX1RCQl9ERUNMX0FUT01JQydcbiAgNTAyIHwgX19UQkJfREVDTF9BVE9NSUMod2NoYXJfdClcbiAgICAgIHwgXn5+fn5+fn5+fn5+fn5+fn5cbiJ9 -->
+<pre><code>b/atomic.h:502:1: note: in expansion of macro &#39;__TBB_DECL_ATOMIC&#39;
+  502 | __TBB_DECL_ATOMIC(wchar_t)
+      | ^~~~~~~~~~~~~~~~~</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5cXFxuXG58XG5cbi9cblxuLVxuXG5cXFxuXG58XG5cbi9cblxuLVxuXG5cXFxuXG58XG5cbi9cblxuLVxuXG5cXFxuIn0= -->
+<pre><code>
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSW4gZmlsZSBpbmNsdWRlZCBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9saWIvYm9vc3RfMS44NC4wL2Jvb3N0L3JhbmRvbS5ocHA6NDYsXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9saWIvc3Rhbl9tYXRoL3N0YW4vbWF0aC9wcmltL3Byb2IvaG1tX2hpZGRlbl9zdGF0ZV9wcm9iLmhwcDo4LFxuICAgICAgICAgICAgICAgICBmcm9tIHN0YW4vbGliL3N0YW5fbWF0aC9zdGFuL21hdGgvcHJpbS9wcm9iLmhwcDoxMjMsXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9saWIvc3Rhbl9tYXRoL3N0YW4vbWF0aC9wcmltLmhwcDoxOCxcbiAgICAgICAgICAgICAgICAgZnJvbSBzdGFuL2xpYi9zdGFuX21hdGgvc3Rhbi9tYXRoL3Jldi5ocHA6MTgsXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9saWIvc3Rhbl9tYXRoL3N0YW4vbWF0aC5ocHA6MTksXG4gICAgICAgICAgICAgICAgIGZyb20gc3Rhbi9zcmMvc3Rhbi9tb2RlbC9tb2RlbF9oZWFkZXIuaHBwOjY6XG5zdGFuL2xpYi9zdGFuX21hdGgvbGliL2Jvb3N0XzEuODQuMC9ib29zdC9yYW5kb20vc2h1ZmZsZV9vcmRlci5ocHA6IEluIG1lbWJlciBmdW5jdGlvbiAnYm9vc3Q6OnJhbmRvbTo6c2h1ZmZsZV9vcmRlcl9lbmdpbmU8VW5pZm9ybVJhbmRvbU51bWJlckdlbmVyYXRvciwgaz46OnJlc3VsdF90eXBlIGJvb3N0OjpyYW5kb206OnNodWZmbGVfb3JkZXJfZW5naW5lPFVuaWZvcm1SYW5kb21OdW1iZXJHZW5lcmF0b3IsIGs+OjpvcGVyYXRvcigpKCknOlxuc3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi9ib29zdF8xLjg0LjAvYm9vc3QvcmFuZG9tL3NodWZmbGVfb3JkZXIuaHBwOjE0Njogbm90ZTogJy1XbWlzbGVhZGluZy1pbmRlbnRhdGlvbicgaXMgZGlzYWJsZWQgZnJvbSB0aGlzIHBvaW50IG9ud2FyZHMsIHNpbmNlIGNvbHVtbi10cmFja2luZyB3YXMgZGlzYWJsZWQgZHVlIHRvIHRoZSBzaXplIG9mIHRoZSBjb2RlL2hlYWRlcnNcbiAgMTQ2IHwgICAgICAgICB9IGVsc2UgaWYoYnJhbmdlIDwgKHN0ZDo6bnVtZXJpY19saW1pdHM8dWludG1heF90Pjo6bWF4KSgpIC8gaykge1xuIn0= -->
+<pre><code>In file included from stan/lib/stan_math/lib/boost_1.84.0/boost/random.hpp:46,
+                 from stan/lib/stan_math/stan/math/prim/prob/hmm_hidden_state_prob.hpp:8,
+                 from stan/lib/stan_math/stan/math/prim/prob.hpp:123,
+                 from stan/lib/stan_math/stan/math/prim.hpp:18,
+                 from stan/lib/stan_math/stan/math/rev.hpp:18,
+                 from stan/lib/stan_math/stan/math.hpp:19,
+                 from stan/src/stan/model/model_header.hpp:6:
+stan/lib/stan_math/lib/boost_1.84.0/boost/random/shuffle_order.hpp: In member function &#39;boost::random::shuffle_order_engine&lt;UniformRandomNumberGenerator, k&gt;::result_type boost::random::shuffle_order_engine&lt;UniformRandomNumberGenerator, k&gt;::operator()()&#39;:
+stan/lib/stan_math/lib/boost_1.84.0/boost/random/shuffle_order.hpp:146: note: &#39;-Wmisleading-indentation&#39; is disabled from this point onwards, since column-tracking was disabled due to the size of the code/headers
+  146 |         } else if(brange &lt; (std::numeric_limits&lt;uintmax_t&gt;::max)() / k) {</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG58XG4ifQ== -->
+<pre><code>
+|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoic3Rhbi9saWIvc3Rhbl9tYXRoL2xpYi9ib29zdF8xLjg0LjAvYm9vc3QvcmFuZG9tL3NodWZmbGVfb3JkZXIuaHBwOjE0Njogbm90ZTogYWRkaW5nICctZmxhcmdlLXNvdXJjZS1maWxlcycgd2lsbCBhbGxvdyBmb3IgbW9yZSBjb2x1bW4tdHJhY2tpbmcgc3VwcG9ydCwgYXQgdGhlIGV4cGVuc2Ugb2YgY29tcGlsYXRpb24gdGltZSBhbmQgbWVtb3J5XG4ifQ== -->
+<pre><code>stan/lib/stan_math/lib/boost_1.84.0/boost/random/shuffle_order.hpp:146: note: adding &#39;-flarge-source-files&#39; will allow for more column-tracking support, at the expense of compilation time and memory</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxufFxuXG4vXG5cbi1cblxuXFxcblxuIFxuUnVubmluZyBNQ01DIHdpdGggNCBzZXF1ZW50aWFsIGNoYWlucywgd2l0aCAxIHRocmVhZChzKSBwZXIgY2hhaW4uLi5cblxuQ2hhaW4gMSBJdGVyYXRpb246ICAgMSAvIDEwMDAgWyAgMCVdICAoV2FybXVwKSBcbkNoYWluIDEgSXRlcmF0aW9uOiAxMDAgLyAxMDAwIFsgMTAlXSAgKFdhcm11cCkgXG5DaGFpbiAxIEl0ZXJhdGlvbjogMjAwIC8gMTAwMCBbIDIwJV0gIChXYXJtdXApIFxuQ2hhaW4gMSBJdGVyYXRpb246IDMwMCAvIDEwMDAgWyAzMCVdICAoV2FybXVwKSBcbkNoYWluIDEgSXRlcmF0aW9uOiA0MDAgLyAxMDAwIFsgNDAlXSAgKFdhcm11cCkgXG5DaGFpbiAxIEl0ZXJhdGlvbjogNTAwIC8gMTAwMCBbIDUwJV0gIChXYXJtdXApIFxuQ2hhaW4gMSBJdGVyYXRpb246IDUwMSAvIDEwMDAgWyA1MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMSBJdGVyYXRpb246IDYwMCAvIDEwMDAgWyA2MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMSBJdGVyYXRpb246IDcwMCAvIDEwMDAgWyA3MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMSBJdGVyYXRpb246IDgwMCAvIDEwMDAgWyA4MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMSBJdGVyYXRpb246IDkwMCAvIDEwMDAgWyA5MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMSBJdGVyYXRpb246IDEwMDAgLyAxMDAwIFsxMDAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDEgZmluaXNoZWQgaW4gMC43IHNlY29uZHMuXG5DaGFpbiAyIEl0ZXJhdGlvbjogICAxIC8gMTAwMCBbICAwJV0gIChXYXJtdXApIFxuQ2hhaW4gMiBJdGVyYXRpb246IDEwMCAvIDEwMDAgWyAxMCVdICAoV2FybXVwKSBcbkNoYWluIDIgSXRlcmF0aW9uOiAyMDAgLyAxMDAwIFsgMjAlXSAgKFdhcm11cCkgXG5DaGFpbiAyIEl0ZXJhdGlvbjogMzAwIC8gMTAwMCBbIDMwJV0gIChXYXJtdXApIFxuQ2hhaW4gMiBJdGVyYXRpb246IDQwMCAvIDEwMDAgWyA0MCVdICAoV2FybXVwKSBcbkNoYWluIDIgSXRlcmF0aW9uOiA1MDAgLyAxMDAwIFsgNTAlXSAgKFdhcm11cCkgXG5DaGFpbiAyIEl0ZXJhdGlvbjogNTAxIC8gMTAwMCBbIDUwJV0gIChTYW1wbGluZykgXG5DaGFpbiAyIEl0ZXJhdGlvbjogNjAwIC8gMTAwMCBbIDYwJV0gIChTYW1wbGluZykgXG5DaGFpbiAyIEl0ZXJhdGlvbjogNzAwIC8gMTAwMCBbIDcwJV0gIChTYW1wbGluZykgXG5DaGFpbiAyIEl0ZXJhdGlvbjogODAwIC8gMTAwMCBbIDgwJV0gIChTYW1wbGluZykgXG5DaGFpbiAyIEl0ZXJhdGlvbjogOTAwIC8gMTAwMCBbIDkwJV0gIChTYW1wbGluZykgXG5DaGFpbiAyIEl0ZXJhdGlvbjogMTAwMCAvIDEwMDAgWzEwMCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMiBmaW5pc2hlZCBpbiAwLjcgc2Vjb25kcy5cbkNoYWluIDMgSXRlcmF0aW9uOiAgIDEgLyAxMDAwIFsgIDAlXSAgKFdhcm11cCkgXG5DaGFpbiAzIEl0ZXJhdGlvbjogMTAwIC8gMTAwMCBbIDEwJV0gIChXYXJtdXApIFxuQ2hhaW4gMyBJdGVyYXRpb246IDIwMCAvIDEwMDAgWyAyMCVdICAoV2FybXVwKSBcbkNoYWluIDMgSXRlcmF0aW9uOiAzMDAgLyAxMDAwIFsgMzAlXSAgKFdhcm11cCkgXG5DaGFpbiAzIEl0ZXJhdGlvbjogNDAwIC8gMTAwMCBbIDQwJV0gIChXYXJtdXApIFxuQ2hhaW4gMyBJdGVyYXRpb246IDUwMCAvIDEwMDAgWyA1MCVdICAoV2FybXVwKSBcbkNoYWluIDMgSXRlcmF0aW9uOiA1MDEgLyAxMDAwIFsgNTAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDMgSXRlcmF0aW9uOiA2MDAgLyAxMDAwIFsgNjAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDMgSXRlcmF0aW9uOiA3MDAgLyAxMDAwIFsgNzAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDMgSXRlcmF0aW9uOiA4MDAgLyAxMDAwIFsgODAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDMgSXRlcmF0aW9uOiA5MDAgLyAxMDAwIFsgOTAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDMgSXRlcmF0aW9uOiAxMDAwIC8gMTAwMCBbMTAwJV0gIChTYW1wbGluZykgXG5DaGFpbiAzIGZpbmlzaGVkIGluIDAuNyBzZWNvbmRzLlxuQ2hhaW4gNCBJdGVyYXRpb246ICAgMSAvIDEwMDAgWyAgMCVdICAoV2FybXVwKSBcbkNoYWluIDQgSXRlcmF0aW9uOiAxMDAgLyAxMDAwIFsgMTAlXSAgKFdhcm11cCkgXG5DaGFpbiA0IEl0ZXJhdGlvbjogMjAwIC8gMTAwMCBbIDIwJV0gIChXYXJtdXApIFxuQ2hhaW4gNCBJdGVyYXRpb246IDMwMCAvIDEwMDAgWyAzMCVdICAoV2FybXVwKSBcbkNoYWluIDQgSXRlcmF0aW9uOiA0MDAgLyAxMDAwIFsgNDAlXSAgKFdhcm11cCkgXG5DaGFpbiA0IEl0ZXJhdGlvbjogNTAwIC8gMTAwMCBbIDUwJV0gIChXYXJtdXApIFxuQ2hhaW4gNCBJdGVyYXRpb246IDUwMSAvIDEwMDAgWyA1MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gNCBJdGVyYXRpb246IDYwMCAvIDEwMDAgWyA2MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gNCBJdGVyYXRpb246IDcwMCAvIDEwMDAgWyA3MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gNCBJdGVyYXRpb246IDgwMCAvIDEwMDAgWyA4MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gNCBJdGVyYXRpb246IDkwMCAvIDEwMDAgWyA5MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gNCBJdGVyYXRpb246IDEwMDAgLyAxMDAwIFsxMDAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDQgZmluaXNoZWQgaW4gMC44IHNlY29uZHMuXG5cbkFsbCA0IGNoYWlucyBmaW5pc2hlZCBzdWNjZXNzZnVsbHkuXG5NZWFuIGNoYWluIGV4ZWN1dGlvbiB0aW1lOiAwLjggc2Vjb25kcy5cblRvdGFsIGV4ZWN1dGlvbiB0aW1lOiAzLjQgc2Vjb25kcy5cbiJ9 -->
+<pre><code>
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+ 
+Running MCMC with 4 sequential chains, with 1 thread(s) per chain...
+
+Chain 1 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 1 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 1 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 1 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 1 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 1 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 1 finished in 0.7 seconds.
+Chain 2 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 2 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 2 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 2 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 2 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 2 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 2 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 2 finished in 0.7 seconds.
+Chain 3 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 3 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 3 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 3 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 3 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 3 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 3 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 3 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 3 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 3 finished in 0.7 seconds.
+Chain 4 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 4 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 4 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 4 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 4 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 4 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 4 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 4 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 4 finished in 0.8 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.8 seconds.
+Total execution time: 3.4 seconds.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2Qgb3ZlcndyaXR0ZW4gYnkgJ2RhdGEudGFibGUnOlxuICBtZXRob2QgICAgICAgICAgIGZyb21cbiAgcHJpbnQuZGF0YS50YWJsZSAgICAgXG4ifQ== -->
+<pre><code>Registered S3 method overwritten by &#39;data.table&#39;:
+  method           from
+  print.data.table     </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJlY2lzKCBtMTEuNCAsIGRlcHRoPTIgKVxuYGBgIn0= -->
+<pre class="r"><code>precis( m11.4 , depth=2 )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTEsIm5jb2wiOjYsInN1bW1hcnkiOnsiRGVzY3JpcHRpb24iOlsiZGYgWzExIMOXIDZdIl19fSwicmRmIjoiSDRzSUFBQUFBQUFBQmd0eWlURG1pdUJpWUdCZ1ptQmhZV1JnWmdVeUdWaERROXgwTFJnWVdKaUFIRVlHRmdaT0VGMEJWQ1FNWkxBQk1SOFFjKysvM1NxM0kvQjFxd08vTVJqc2Y3NU9wT3FoKzdyOXoyTTB2aDdxajRISjJ6OWdBQVA3LzFENWRTQlJ1UjMyZHdzV1grZXlMZHgvY3lZSXpMSy9sZ1lHTVBQdHI0QlVpMVRiUCtleUJhbUU4NitDalpYSDROOEEyYXJ4emY2aU84Z2lEd1FOc2kzd0RZeUd1LzhkeEIwT2JDQm5GQ3paL3dYc2JFMDQvUTdpbnYzem9PNzlDbkhuL250UVBsUjgveXV3ODJ6M2I0ZTRFKzcralJEN0hFU2cvandETlJkSzIyK0J1djhEaE8vQUFuWC9EYkN4UWZadnpvREFXZnNsVUhVdklmYkR6ZjhBRFZlaWFhaTljQnE3T3BqNURoMkI0UEJ6bUh3RkhHOE9yYzNnZUhibzVBSTY4K3RoaDlZZ2NMZzdkSFJDMVBYR2c5M3QwR29POW9kRDgycEkrbWcrQTFIZnRoK3NIeTFoc2VZbDVxWVdBeGtDNE1RRkVXVEpUVTNNZzdLWmlsTmdvcVo2cHFvd2JaWW1DQTVMVVVaaUNaVE5rVnBjSEo5VW1wT05aZzluVVg2NUhySmQzREROaWRHR3NRaTJFUkxiR0lsdGdzUTJSV0tiSWJITjRld2tKRE9Ua014TVFqSXpDV1FtV21BazV5UVd3eHdJRStSS1NTeEoxRXNyQXJvZHlQdUhwb1U5djZBa016OFBxSWtKbGoyUk5UTVdvUW53bCthQlFpRkZOem1qTkM5YjF3eE5tcmtnTHgxa0oxZ0lnbm1oTkRjU213M2lDcWIvYUJISGxwcVhucG1YQ3ZOT1RtSlNhZzdNNUpUVU1paVREeGdYNEtqUUt5akt6SVBGSEJkUXRGaXZKTDhrRWFhRkt6ay9CeVlDOWpuRFB3REVsSVdxc3dRQUFBPT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["mean"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["sd"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["5.5%"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["94.5%"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["rhat"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["ess_bulk"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"-0.43","2":"0.32","3":"-0.96","4":"0.07","5":"1.00","6":"778.21","_rn_":"a[1]"},{"1":"3.90","2":"0.72","3":"2.83","4":"5.11","5":"1.00","6":"1269.02","_rn_":"a[2]"},{"1":"-0.74","2":"0.32","3":"-1.26","4":"-0.22","5":"1.00","6":"688.40","_rn_":"a[3]"},{"1":"-0.73","2":"0.33","3":"-1.26","4":"-0.22","5":"1.00","6":"801.32","_rn_":"a[4]"},{"1":"-0.43","2":"0.32","3":"-0.95","4":"0.08","5":"1.00","6":"682.34","_rn_":"a[5]"},{"1":"0.50","2":"0.33","3":"-0.03","4":"1.01","5":"1.00","6":"785.21","_rn_":"a[6]"},{"1":"1.98","2":"0.39","3":"1.35","4":"2.62","5":"1.01","6":"939.99","_rn_":"a[7]"},{"1":"-0.06","2":"0.27","3":"-0.48","4":"0.38","5":"1.01","6":"678.97","_rn_":"b[1]"},{"1":"0.46","2":"0.27","3":"0.03","4":"0.90","5":"1.00","6":"629.39","_rn_":"b[2]"},{"1":"-0.40","2":"0.28","3":"-0.82","4":"0.04","5":"1.00","6":"633.57","_rn_":"b[3]"},{"1":"0.35","2":"0.28","3":"-0.09","4":"0.80","5":"1.00","6":"727.90","_rn_":"b[4]"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[11]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5wb3N0IDwtIGV4dHJhY3Quc2FtcGxlcyhtMTEuNClcbnBfbGVmdCA8LSBpbnZfbG9naXQoIHBvc3QkYSApXG5wbG90KCBwcmVjaXMoIGFzLmRhdGEuZnJhbWUocF9sZWZ0KSApICwgeGxpbT1jKDAsMSkgKVxuYGBgIn0= -->
+<pre class="r"><code>
+post &lt;- extract.samples(m11.4)
+p_left &lt;- inv_logit( post$a )
+plot( precis( as.data.frame(p_left) ) , xlim=c(0,1) )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjQzMi42MzI5LCJ3aWR0aCI6NzAwLCJkcGkiOi0xLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5sYWJzIDwtIGMoXCJSL05cIixcIkwvTlwiLFwiUi9QXCIsXCJML1BcIilcbnBsb3QoIHByZWNpcyggbTExLjQgLCBkZXB0aD0yICwgcGFycz1cImJcIiApICwgbGFiZWxzPWxhYnMgKVxuYGBgIn0= -->
+<pre class="r"><code>
+labs &lt;- c(&quot;R/N&quot;,&quot;L/N&quot;,&quot;R/P&quot;,&quot;L/P&quot;)
+plot( precis( m11.4 , depth=2 , pars=&quot;b&quot; ) , labels=labs )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjQzMi42MzI5LCJ3aWR0aCI6NzAwLCJkcGkiOi0xLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5kaWZmcyA8LSBsaXN0KFxuZGIxMyA9IHBvc3QkYlssMV0gLSBwb3N0JGJbLDNdLFxuZGIyNCA9IHBvc3QkYlssMl0gLSBwb3N0JGJbLDRdIClcbnBsb3QoIHByZWNpcyhkaWZmcykgKVxuYGBgIn0= -->
+<pre class="r"><code>
+diffs &lt;- list(
+db13 = post$b[,1] - post$b[,3],
+db24 = post$b[,2] - post$b[,4] )
+plot( precis(diffs) )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-plot-begin eyJoZWlnaHQiOjQzMi42MzI5LCJ3aWR0aCI6NzAwLCJkcGkiOi0xLCJzaXplX2JlaGF2aW9yIjowLCJjb25kaXRpb25zIjpbXX0= -->
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<!-- rnb-plot-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5wbCA8LSBieSggZCRwdWxsZWRfbGVmdCAsIGxpc3QoIGQkYWN0b3IgLCBkJHRyZWF0bWVudCApICwgbWVhbiApXG5wbFsxLF1cbmBgYCJ9 -->
+<pre class="r"><code>
+pl &lt;- by( d$pulled_left , list( d$actor , d$treatment ) , mean )
+pl[1,]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAxICAgICAgICAgMiAgICAgICAgIDMgICAgICAgICA0IFxuMC4zMzMzMzMzIDAuNTAwMDAwMCAwLjI3Nzc3NzggMC41NTU1NTU2IFxuIn0= -->
+<pre><code>        1         2         3         4 
+0.3333333 0.5000000 0.2777778 0.5555556 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0IDwtIGxpc3QoIGFjdG9yPXJlcCgxOjcsZWFjaD00KSAsIHRyZWF0bWVudD1yZXAoMTo0LHRpbWVzPTcpIClcbnBfcG9zdCA8LSBsaW5rKCBtMTEuNCAsIGRhdGE9ZGF0IClcbnBfbXUgPC0gYXBwbHkoIHBfcG9zdCAsIDIgLCBtZWFuIClcbnBfY2kgPC0gYXBwbHkoIHBfcG9zdCAsIDIgLCBQSSApXG5gYGAifQ== -->
+<pre class="r"><code>dat &lt;- list( actor=rep(1:7,each=4) , treatment=rep(1:4,times=7) )
+p_post &lt;- link( m11.4 , data=dat )
+p_mu &lt;- apply( p_post , 2 , mean )
+p_ci &lt;- apply( p_post , 2 , PI )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZCRzaWRlIDwtIGQkcHJvc29jX2xlZnQgKyAxICMgcmlnaHQgMSwgbGVmdCAyXG5kJGNvbmQgPC0gZCRjb25kaXRpb24gKyAxICMgbm8gcGFydG5lciAxLCBwYXJ0bmVyIDJcblxuZGF0X2xpc3QyIDwtIGxpc3QoXG5wdWxsZWRfbGVmdCA9IGQkcHVsbGVkX2xlZnQsXG5hY3RvciA9IGQkYWN0b3IsXG5zaWRlID0gZCRzaWRlLFxuY29uZCA9IGQkY29uZCApXG5tMTEuNSA8LSB1bGFtKFxuYWxpc3QoXG5wdWxsZWRfbGVmdCB+IGRiaW5vbSggMSAsIHAgKSAsXG5sb2dpdChwKSA8LSBhW2FjdG9yXSArIGJzW3NpZGVdICsgYmNbY29uZF0gLFxuYVthY3Rvcl0gfiBkbm9ybSggMCAsIDEuNSApLFxuYnNbc2lkZV0gfiBkbm9ybSggMCAsIDAuNSApLFxuYmNbY29uZF0gfiBkbm9ybSggMCAsIDAuNSApXG4pICwgZGF0YT1kYXRfbGlzdDIgLCBjaGFpbnM9NCAsIGxvZ19saWs9VFJVRSApXG5gYGAifQ== -->
+<pre class="r"><code>d$side &lt;- d$prosoc_left + 1 # right 1, left 2
+d$cond &lt;- d$condition + 1 # no partner 1, partner 2
+
+dat_list2 &lt;- list(
+pulled_left = d$pulled_left,
+actor = d$actor,
+side = d$side,
+cond = d$cond )
+m11.5 &lt;- ulam(
+alist(
+pulled_left ~ dbinom( 1 , p ) ,
+logit(p) &lt;- a[actor] + bs[side] + bc[cond] ,
+a[actor] ~ dnorm( 0 , 1.5 ),
+bs[side] ~ dnorm( 0 , 0.5 ),
+bc[cond] ~ dnorm( 0 , 0.5 )
+) , data=dat_list2 , chains=4 , log_lik=TRUE )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29tcGlsaW5nIFN0YW4gcHJvZ3JhbS4uLlxuIn0= -->
+<pre><code>Compiling Stan program...</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbnxcblxuL1xuXG4tXG5cblxcXG5cbiBcblJ1bm5pbmcgTUNNQyB3aXRoIDQgc2VxdWVudGlhbCBjaGFpbnMsIHdpdGggMSB0aHJlYWQocykgcGVyIGNoYWluLi4uXG5cbkNoYWluIDEgSXRlcmF0aW9uOiAgIDEgLyAxMDAwIFsgIDAlXSAgKFdhcm11cCkgXG5DaGFpbiAxIEl0ZXJhdGlvbjogMTAwIC8gMTAwMCBbIDEwJV0gIChXYXJtdXApIFxuQ2hhaW4gMSBJdGVyYXRpb246IDIwMCAvIDEwMDAgWyAyMCVdICAoV2FybXVwKSBcbkNoYWluIDEgSXRlcmF0aW9uOiAzMDAgLyAxMDAwIFsgMzAlXSAgKFdhcm11cCkgXG5DaGFpbiAxIEl0ZXJhdGlvbjogNDAwIC8gMTAwMCBbIDQwJV0gIChXYXJtdXApIFxuQ2hhaW4gMSBJdGVyYXRpb246IDUwMCAvIDEwMDAgWyA1MCVdICAoV2FybXVwKSBcbkNoYWluIDEgSXRlcmF0aW9uOiA1MDEgLyAxMDAwIFsgNTAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDEgSXRlcmF0aW9uOiA2MDAgLyAxMDAwIFsgNjAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDEgSXRlcmF0aW9uOiA3MDAgLyAxMDAwIFsgNzAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDEgSXRlcmF0aW9uOiA4MDAgLyAxMDAwIFsgODAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDEgSXRlcmF0aW9uOiA5MDAgLyAxMDAwIFsgOTAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDEgSXRlcmF0aW9uOiAxMDAwIC8gMTAwMCBbMTAwJV0gIChTYW1wbGluZykgXG5DaGFpbiAxIGZpbmlzaGVkIGluIDAuOSBzZWNvbmRzLlxuQ2hhaW4gMiBJdGVyYXRpb246ICAgMSAvIDEwMDAgWyAgMCVdICAoV2FybXVwKSBcbkNoYWluIDIgSXRlcmF0aW9uOiAxMDAgLyAxMDAwIFsgMTAlXSAgKFdhcm11cCkgXG5DaGFpbiAyIEl0ZXJhdGlvbjogMjAwIC8gMTAwMCBbIDIwJV0gIChXYXJtdXApIFxuQ2hhaW4gMiBJdGVyYXRpb246IDMwMCAvIDEwMDAgWyAzMCVdICAoV2FybXVwKSBcbkNoYWluIDIgSXRlcmF0aW9uOiA0MDAgLyAxMDAwIFsgNDAlXSAgKFdhcm11cCkgXG5DaGFpbiAyIEl0ZXJhdGlvbjogNTAwIC8gMTAwMCBbIDUwJV0gIChXYXJtdXApIFxuQ2hhaW4gMiBJdGVyYXRpb246IDUwMSAvIDEwMDAgWyA1MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMiBJdGVyYXRpb246IDYwMCAvIDEwMDAgWyA2MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMiBJdGVyYXRpb246IDcwMCAvIDEwMDAgWyA3MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMiBJdGVyYXRpb246IDgwMCAvIDEwMDAgWyA4MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMiBJdGVyYXRpb246IDkwMCAvIDEwMDAgWyA5MCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMiBJdGVyYXRpb246IDEwMDAgLyAxMDAwIFsxMDAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDIgZmluaXNoZWQgaW4gMC45IHNlY29uZHMuXG5DaGFpbiAzIEl0ZXJhdGlvbjogICAxIC8gMTAwMCBbICAwJV0gIChXYXJtdXApIFxuQ2hhaW4gMyBJdGVyYXRpb246IDEwMCAvIDEwMDAgWyAxMCVdICAoV2FybXVwKSBcbkNoYWluIDMgSXRlcmF0aW9uOiAyMDAgLyAxMDAwIFsgMjAlXSAgKFdhcm11cCkgXG5DaGFpbiAzIEl0ZXJhdGlvbjogMzAwIC8gMTAwMCBbIDMwJV0gIChXYXJtdXApIFxuQ2hhaW4gMyBJdGVyYXRpb246IDQwMCAvIDEwMDAgWyA0MCVdICAoV2FybXVwKSBcbkNoYWluIDMgSXRlcmF0aW9uOiA1MDAgLyAxMDAwIFsgNTAlXSAgKFdhcm11cCkgXG5DaGFpbiAzIEl0ZXJhdGlvbjogNTAxIC8gMTAwMCBbIDUwJV0gIChTYW1wbGluZykgXG5DaGFpbiAzIEl0ZXJhdGlvbjogNjAwIC8gMTAwMCBbIDYwJV0gIChTYW1wbGluZykgXG5DaGFpbiAzIEl0ZXJhdGlvbjogNzAwIC8gMTAwMCBbIDcwJV0gIChTYW1wbGluZykgXG5DaGFpbiAzIEl0ZXJhdGlvbjogODAwIC8gMTAwMCBbIDgwJV0gIChTYW1wbGluZykgXG5DaGFpbiAzIEl0ZXJhdGlvbjogOTAwIC8gMTAwMCBbIDkwJV0gIChTYW1wbGluZykgXG5DaGFpbiAzIEl0ZXJhdGlvbjogMTAwMCAvIDEwMDAgWzEwMCVdICAoU2FtcGxpbmcpIFxuQ2hhaW4gMyBmaW5pc2hlZCBpbiAwLjkgc2Vjb25kcy5cbkNoYWluIDQgSXRlcmF0aW9uOiAgIDEgLyAxMDAwIFsgIDAlXSAgKFdhcm11cCkgXG5DaGFpbiA0IEl0ZXJhdGlvbjogMTAwIC8gMTAwMCBbIDEwJV0gIChXYXJtdXApIFxuQ2hhaW4gNCBJdGVyYXRpb246IDIwMCAvIDEwMDAgWyAyMCVdICAoV2FybXVwKSBcbkNoYWluIDQgSXRlcmF0aW9uOiAzMDAgLyAxMDAwIFsgMzAlXSAgKFdhcm11cCkgXG5DaGFpbiA0IEl0ZXJhdGlvbjogNDAwIC8gMTAwMCBbIDQwJV0gIChXYXJtdXApIFxuQ2hhaW4gNCBJdGVyYXRpb246IDUwMCAvIDEwMDAgWyA1MCVdICAoV2FybXVwKSBcbkNoYWluIDQgSXRlcmF0aW9uOiA1MDEgLyAxMDAwIFsgNTAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDQgSXRlcmF0aW9uOiA2MDAgLyAxMDAwIFsgNjAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDQgSXRlcmF0aW9uOiA3MDAgLyAxMDAwIFsgNzAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDQgSXRlcmF0aW9uOiA4MDAgLyAxMDAwIFsgODAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDQgSXRlcmF0aW9uOiA5MDAgLyAxMDAwIFsgOTAlXSAgKFNhbXBsaW5nKSBcbkNoYWluIDQgSXRlcmF0aW9uOiAxMDAwIC8gMTAwMCBbMTAwJV0gIChTYW1wbGluZykgXG5DaGFpbiA0IGZpbmlzaGVkIGluIDEuMCBzZWNvbmRzLlxuXG5BbGwgNCBjaGFpbnMgZmluaXNoZWQgc3VjY2Vzc2Z1bGx5LlxuTWVhbiBjaGFpbiBleGVjdXRpb24gdGltZTogMC45IHNlY29uZHMuXG5Ub3RhbCBleGVjdXRpb24gdGltZTogNC4yIHNlY29uZHMuXG4ifQ== -->
+<pre><code>
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+|
+
+/
+
+-
+
+\
+
+ 
+Running MCMC with 4 sequential chains, with 1 thread(s) per chain...
+
+Chain 1 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 1 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 1 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 1 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 1 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 1 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 1 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 1 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 1 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 1 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 1 finished in 0.9 seconds.
+Chain 2 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 2 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 2 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 2 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 2 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 2 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 2 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 2 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 2 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 2 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 2 finished in 0.9 seconds.
+Chain 3 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 3 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 3 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 3 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 3 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 3 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 3 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 3 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 3 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 3 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 3 finished in 0.9 seconds.
+Chain 4 Iteration:   1 / 1000 [  0%]  (Warmup) 
+Chain 4 Iteration: 100 / 1000 [ 10%]  (Warmup) 
+Chain 4 Iteration: 200 / 1000 [ 20%]  (Warmup) 
+Chain 4 Iteration: 300 / 1000 [ 30%]  (Warmup) 
+Chain 4 Iteration: 400 / 1000 [ 40%]  (Warmup) 
+Chain 4 Iteration: 500 / 1000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 501 / 1000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 600 / 1000 [ 60%]  (Sampling) 
+Chain 4 Iteration: 700 / 1000 [ 70%]  (Sampling) 
+Chain 4 Iteration: 800 / 1000 [ 80%]  (Sampling) 
+Chain 4 Iteration: 900 / 1000 [ 90%]  (Sampling) 
+Chain 4 Iteration: 1000 / 1000 [100%]  (Sampling) 
+Chain 4 finished in 1.0 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.9 seconds.
+Total execution time: 4.2 seconds.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tcGFyZSggbTExLjUgLCBtMTEuNCAsIGZ1bmM9UFNJUyApXG5gYGAifQ== -->
+<pre class="r"><code>compare( m11.5 , m11.4 , func=PSIS )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MiwibmNvbCI6Niwic3VtbWFyeSI6eyJEZXNjcmlwdGlvbiI6WyJkZiBbMiDDlyA2XSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJndHlpVERtaXVCaVlHQmdabUJoWVdSZ1pnVXlHVmhEUTl4MExSZ1lXSmlBSEVZR0ZnWk9FRjBCVkNRTVpMQUJNUjhRTXprMFRBR3BabkJvbUpjR0FuQnhZM0V1MjRMRjF4Mk1QaHVEQUV5Y0FRcnN2NXdCZ2JNdzhmb1BJRkgyUmZaZlo0TEFMTGc1Y21CajB4d1VVTVh0bjhydENIemRLbTkvOVZCL2pNYlh3MmdPWmMxTHpFMHRCaklFd0k2RkNMSUVCSHNHUTlsTXdhNHdwU2xJd3N3cENQRUNKSEcyOHRUTTlJd1NORnM0aS9MTDlaQnRZb0xwelRVMDFETkY1cGlnT3pBNUo3RVlwZzBteUpXU1dKS29sMVlFTkJISSs0ZW1oVDIvb0NRelB3K29pUWtXQmNpYUdZdlFCUGhMODBCdVM5Rk56aWpOeTlZMVJKTm1Mc2hMQjlrSkZvSmdYaWpOaE1SbWc3aUM2VDlhWUxLbDVxVm41cVhDdkpPVG1KU2FBdy9FMURJb2t3OFlRdUFBMGlzb3lzd3JnZmtUS0Zxc1Y1SmZrZ2pUd3BXY253TVRBZnVjNFI4QXVPTGEzWmNDQUFBPSJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["PSIS"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["dPSIS"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["dSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["pPSIS"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["weight"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"530.5","2":"19.09","3":"0.0","4":"NA","5":"7.6","6":"0.66","_rn_":"m11.5"},{"1":"531.8","2":"18.95","3":"1.3","4":"1.35","5":"8.3","6":"0.34","_rn_":"m11.4"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[2]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5wb3N0IDwtIGV4dHJhY3Quc2FtcGxlcyhtMTEuNClcbm1lYW4oIGV4cChwb3N0JGJbLDRdLXBvc3QkYlssMl0pIClcbmBgYCJ9 -->
+<pre class="r"><code>
+post &lt;- extract.samples(m11.4)
+mean( exp(post$b[,4]-post$b[,2]) )</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuOTMzODcxNFxuIn0= -->
+<pre><code>[1] 0.9338714</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RyKGRfYWdncmVnYXRlZClcblxuYGBgIn0= -->
+<pre class="r"><code>str(d_aggregated)
 </code></pre>
-<p>Loading required package: rethinking Loading required package:
-cmdstanr This is cmdstanr version 0.8.1 - CmdStanR documentation and
-vignettes: mc-stan.org/cmdstanr - CmdStan path:
-C:/Users/kathe/.cmdstan/cmdstan-2.35.0 - CmdStan version: 2.35.0</p>
-<p>A newer version of CmdStan is available. See ?install_cmdstan() to
-install it. To disable this check set option or environment variable
-cmdstanr_no_ver_check=TRUE. Loading required package: posterior This is
-posterior version 1.6.0</p>
-<p>Attaching package: ‘posterior’</p>
-<p>The following objects are masked from ‘package:stats’:</p>
-<pre><code>mad, sd, var</code></pre>
-<p>The following objects are masked from ‘package:base’:</p>
-<pre><code>%in%, match</code></pre>
-<p>Loading required package: parallel rethinking (Version 2.42)</p>
-<p>Attaching package: ‘rethinking’</p>
-<p>The following object is masked from ‘package:purrr’:</p>
-<pre><code>map</code></pre>
-<p>The following object is masked from ‘package:stats’:</p>
-<pre><code>rstudent</code></pre>
-<pre><code>
-
-
-&lt;!-- rnb-output-end --&gt;
-
-&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxucmVxdWlyZShkYWdpdHR5KVxuYGBgXG5gYGAifQ== --&gt;
-
-```r
-```r
-require(dagitty)</code></pre>
-<pre><code>
-&lt;!-- rnb-source-end --&gt;
-
-&lt;!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBkYWdpdHR5XG4ifQ== --&gt;
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiJ2RhdGEuZnJhbWUnOlx0Mjggb2JzLiBvZiAgNSB2YXJpYWJsZXM6XG4gJCB0cmVhdG1lbnQgOiBudW0gIDEgMSAxIDEgMSAxIDEgMiAyIDIgLi4uXG4gJCBhY3RvciAgICAgOiBpbnQgIDEgMiAzIDQgNSA2IDcgMSAyIDMgLi4uXG4gJCBzaWRlICAgICAgOiBudW0gIDEgMSAxIDEgMSAxIDEgMiAyIDIgLi4uXG4gJCBjb25kICAgICAgOiBudW0gIDEgMSAxIDEgMSAxIDEgMSAxIDEgLi4uXG4gJCBsZWZ0X3B1bGxzOiBpbnQgIDYgMTggNSA2IDYgMTQgMTQgOSAxOCAxMSAuLi5cbiJ9 -->
+<pre><code>&#39;data.frame&#39;:   28 obs. of  5 variables:
+ $ treatment : num  1 1 1 1 1 1 1 2 2 2 ...
+ $ actor     : int  1 2 3 4 5 6 7 1 2 3 ...
+ $ side      : num  1 1 1 1 1 1 1 2 2 2 ...
+ $ cond      : num  1 1 1 1 1 1 1 1 1 1 ...
+ $ left_pulls: int  6 18 5 6 6 14 14 9 18 11 ...</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY29tcGFyZSggbTExLjYgLCBtMTEuNCAsIGZ1bmM9UFNJUyApXG5cbmBgYCJ9 -->
+<pre class="r"><code>compare( m11.6 , m11.4 , func=PSIS )
 </code></pre>
-<p>Loading required package: dagitty</p>
-<pre><code>
-
-
-&lt;!-- rnb-output-end --&gt;
-
-&lt;!-- rnb-chunk-end --&gt;
-
-
-&lt;!-- rnb-text-begin --&gt;
-
-
-
-&lt;!-- rnb-text-end --&gt;
-
-
-&lt;!-- rnb-chunk-begin --&gt;
-
-
-&lt;!-- rnb-plot-begin --&gt;
-
-&lt;img src=&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAD3CAMAAAAE5/KoAAAAe1BMVEUAAAAAADoAAGYAOjoAOpAAZrY6AAA6ADo6AGY6OgA6Ojo6OpA6kLY6kNtmAABmADpmZgBmZmZmkJBmtrZmtv+QOgCQZgCQkGaQtpCQ29uQ2/+2ZgC2kDq225C2/7a2//++vr7bkDrb/7bb////tmb/25D//7b//9v///+MlKx2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAALY0lEQVR4nO2diXqjvBlGlfyJZ7rY6ZK0f03blAl2uP8rLFoQEov0SQb8gd/zPDMh2JIVHWsXIGrACnHvBAAfCGEGhDADQpgBIcyAEGZACDMghBkQwgwIYQaEMANCmAEhzIAQZkAIMyCEGRDCDAhhBoQwA0KYASHMgBBmQAgzIIQZEMIMCGEGhDADQpgBIcyAEGZACDMghBkQwgwIYQaEMANCmAEhzIAQZkAIM9KFCDATcwlJDgFGgRBmQAgzIIQZEMKMBYXAUQ5LCoGRDCCEGRDCDAhhBoQwYzkhAt2sHCCEGRDCjKWECAjJYzEhAkP1LJYVAiXJJAsphHj9/hBCvAdDqD4vOr7ppAopX74aJ691fT0dQyEgJJNEId8fjYbq6VxrNdMhtBDUWckkCrmempqqev6s2//124dr8yISEZhgsRISiQhMkN2GKDXTITohcJLEYr0s+wNCklhupG5+oKeVBoQwYyEhwv6EkDRWEQIndBYWUgsISWNpIbqEwAiZxYUoHRBCBkKYASHMWEcIjJBZQQjmT1JYQ0hWhI8KhDADQpixkhAYobKiEDihsJ4QzJ+QgBBmQAgzVhMi0IyQWFUICkmcFYXUU7e6AQ5rCdEnISQKhDBjTSFo1AkkCymeP+vLQQi1v3cyxFQEMBIjVYjy8eNs9sFPhoCQXCJCrie5sbpDXaZTqFPB3e/TQtDVChMtIWWTg90+d1kuzL734PUhASEoJUEoVZbrRJaO8oYSIgIvgprahkglukBcT8+fzlU7UyEgJBeCkEpdDPL9YUpEpW8v+xoIEclzCAkQE9K06kKbcNqMeDwQkku0l9UbbxDjgZBcYkLetI9w8RjGAyG5EIWUcwqBkQBBIUV3i/jj6Pum4onkOIRMQywhifFASDbLzPbGhGD6ZJK7CEEZmSYk5Ho6ymGIIq1Rj+c3jExwpxKi3wErQ+4pBC3JCPGpk6OcWvRmduPxJAqBmI6YkOLl63J4NWtS5HhIQrqVEQjpiM5lvdeVeE+dOiHksLuTEXVXB0GIXEZPnDqhC9GNO4RYolXW6/X08nU9zV1lGSECQnoQ1kOezt8fMR/5JQTdLZ97dXutBQjxuaOQ7id2onTEhKjbKy4wdQIhE0Qb9ZiJ0XiS8hd7tVyi3d7YytRoPBCSDWEckhFPmhCR02jtlYgQQod3LB4IySbWhlSCVkQgZCaiVdZCC1TumyHEIXMccjn0Cs4NQmoIcUgUYktMv9DcIiQnwG6JCmkUvHwVtvNb6R1as5aQnAC7JdqoP51LOdtrjcjJ376QwQU76UJwowdDtNt7VFfmuOshxdN59hKi5n1xz+WaNDCUQrwVw1IclxGCO8qSS0jh7XK4HH6bW4i9tgpCwmd1G1L2hoffH/3x4s1CZgi6Cyi9rMFdAqLx3CzkcbXcb4EqGNHjtu0QwgzSXFZ03+KMQvQi++PWWWEhhW67y+gFVLMLeVgjQSH25gCDYUckHgjJJiTEWZ2afW9vOCYIGT3rzGDNv5U0ENNDz2uFhdiKav7N1qGoxK1RbBiWQsz/DznXyFBIG8VjTv6yFfKot14OC5lYr43GM4uQx9z+wG7qxI1jVMjODfEVUtshiX8OQjLimTPTenFBSE48EJINfyH9qCEkI56lhIj974LYghAb2yNsS9mAEB2bWbeCkKx4lhHyEEPFLQjRMgSE5MczuxDRXogo2un5vZIspFQ3Hq/7a1bLCukmfkW98zs2pgopn861vvPJikKG8yf7rbgShehnh6gb868ppM+O5+UThbRLJMXLVxl4oMtqQvanJauE1HIbyj1LSNuw77CcJLchRsP1NOs1hhmoPheE1O2VCd8fdxeyy5ZkE+OQqY/cY2drw0JW/qSVgBBm7EXIbsRsX4jf/918M78DIV7/F0JGQ6yYK8IIae8FASFjIdYU0i5d1dbJpluUzQvpJraEK2fNBMzKDoQ4CyR63WTTC+97EOJ8rl3EulMCbmePQvTRRovJvoR4Kdjm3OMiQtjkA5uE0Nm3EJOSLZWUnQtpl7G2087vXYgZk2zn/oH7F+J2vDglbILdC+kS41RbrBLos38hLvrep7akcCwyjyXEVmDtiJ5fUh9MSEu3hsItrQ8qpKuthjMs9039owqxidSTw+00sRB+rXa3ZJHOkuPZhJAO91Ig2+J7N4ladcGNfpYcz8aEOC2K/rWVU99hC3GykIkHG25ayBA7sDf/1ps5ThVib1Ba+Xcq3ZkQjVM8hPswZX1iOPKfQ1qiEHs5Qq3u0T8RYi9CHGzzItyhpfe76R24PYP2l6kMGXk0c6KQ8XuaNZ/4PzATaUJoJQTkk96GmCISakNAPsm9rPa+f737wUPITCwyDgH5QAgzZhMCZmImIbNEsNdQ98rPmyPYaygIYRaKgRAwLxDCDAhhBoQwA0KYASHMgBBmQAgzIIQZEMKMXCGV++j1ivIc9pE3Xn5Gnnc1DKX2JkWf1zv4rDIzhfIeoKnB9MJe7IGpU2QKkc/Otc/P9X4hh5Ipjz2AbBDq+6M5KCl/rfdZ8v6ROSlsMpokxAt2+UFSP0GeEL0Dwjw21/uFHEp9qyhCvFD62cnRx8P2QqknyzrP+6WmUH7ZKUL8YNEHDwbJE+LlCzmT/DdW4khK+kj0hC/7MBRFSD9U+fIPihA/WJlbWykyhahSafLT+4UcqqaFGY2+yPgsdev0xFDNr6Q2xA9W/JHazI2RJ0R/Rc0X1fuFHEqdoAgZRl8R/tx+qIqUR34oWRORhHjBricZpMg1skEhFbVN9xOlbmOfFEpuEEwXYk7lNiTbq7Io5WM0UZSWZ/B3ZVRZ+tThffLtQe7XqNdUIX6oklY9jySKkEdeqNJsDonn7NiH5fZ979jtJQrxQ5WE/BmE0hlG+LThn0IqIXkfNs49B4bEVLuhLgdqY+l9lsxWZ/c4PYXEkbr/YVLMyo26nYvQnXvyxIQXivw1ckKZaoTyad5nFaSqZ5hC6tRJ3oeNgclFZkAIMyCEGRDCDAhhBoQwA0KYsayQ9nliU715s4ZrF0ADBw5FbCzij1K7C7zV+O3dveJ7EHJ0Zdo5a1edzYEZgFTkaZYYSwvRM7MTQswarh3nBg5cdGyB9Y2paYPmvJQxLWR8AsI5a1edzUHRnLZzZPpBtTeytJDf1CTbuBCzhmtnggIHHjo2tS47Tq6Q8Sk656xddTYHOg3tdfyE+dU4Swt5VQuao0LaNVw7Vxo48AK2QuRrZprievr7SVcYsg7559O/5BxGJU8UL79O3fnfD0I0J/52GK1dxiexu7N21bk98BZC6PNsIRYXovLNCLkcerW/FtKuJgQOvFhNlaVMv7aPtZa7UZp/hcq3p7P81srdKc3XW6fAnNclxLy5n6TxZR7vrE2LK0TLJSwsE1hcSHDdzf+aBQ68ULpRl/tBrm9n/VVWdUdzoL/NhQ5Z/PXlq8lN6cCe10KO46sj4wuh/llPiCk8SkigCk1heSGhlelMISq2diW3krWPKgXNf1XbS2iOr2+///xsTsjX3PP2zcPkpAoxjboSQlqAiLO8EJn0oJDMKktVEU3L8PyfQ5fHpe22FcfLn369nZs6Tb5WkoQkV1mqtD7/922645LMCkKavAm3IXmNun39chgpIU1N+e/Xuvjzh35tsoT4bUikUa+HQtQ7f37OVmOtIuTy4w+hEpLZ7ZU/dJXnVFkm82RF8vMvx7qUve6uDSkjJSTa7R0Xorq92bsaeqwhpCnXISGZA0PpQRcOcezyWLqQvSndlVJbc9Vr7Xn5RZ4UEh8Y9oSooSB5GxSJVYTovWMjVHZ/h/5zAgcOztSJetl0nkzOq/HGWTcxamhwdcYhZ/nl+DUpZGJl2klEr4TIne7mPbN0ejG5yA4IYQaEMANCmAEhzPg/wXlZijg7DakAAAAASUVORK5CYII=&quot; /&gt;
-
-&lt;!-- rnb-plot-end --&gt;
-
-&lt;!-- rnb-chunk-end --&gt;
-
-
-&lt;!-- rnb-text-begin --&gt;
-
-
-
-&lt;!-- rnb-text-end --&gt;
-
-
-&lt;!-- rnb-chunk-begin --&gt;
-
-
-&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxucGxbMSxdXG5cbmBgYFxuYGBgIn0= --&gt;
-
-```r
-```r
-pl[1,]
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogRGlmZmVyZW50IG51bWJlcnMgb2Ygb2JzZXJ2YXRpb25zIGZvdW5kIGZvciBhdCBsZWFzdCB0d28gbW9kZWxzLlxuTW9kZWwgY29tcGFyaXNvbiBpcyB2YWxpZCBvbmx5IGZvciBtb2RlbHMgZml0IHRvIGV4YWN0bHkgdGhlIHNhbWUgb2JzZXJ2YXRpb25zLlxuTnVtYmVyIG9mIG9ic2VydmF0aW9ucyBmb3IgZWFjaCBtb2RlbDpcbm0xMS42IDI4IFxubTExLjQgNTA0IFxuU29tZSBQYXJldG8gayB2YWx1ZXMgYXJlIGhpZ2ggKD4wLjUpLiBTZXQgcG9pbnR3aXNlPVRSVUUgdG8gaW5zcGVjdCBpbmRpdmlkdWFsIHBvaW50cy5cbiJ9 -->
+<pre><code>Warning: Different numbers of observations found for at least two models.
+Model comparison is valid only for models fit to exactly the same observations.
+Number of observations for each model:
+m11.6 28 
+m11.4 504 
+Some Pareto k values are high (&gt;0.5). Set pointwise=TRUE to inspect individual points.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MiwibmNvbCI6Niwic3VtbWFyeSI6eyJEZXNjcmlwdGlvbiI6WyJkZiBbMiDDlyA2XSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJndHlpVERtaXVCaVlHQmdabUJoWVdSZ1pnVXlHVmhEUTl4MExSZ1lXSmlBSEVZR0ZnWk9FRjBCVkNRTVpMQUJNUjhRTXpuRXJEa0RCR2NkR3VhbGdRQmNYRkZ1UitEclZua0hvOC9HSUFBVFo0QUNoeXJCbVVBd0N5WmUvd0VreXI3SVFWbmo2NkgrR0UyRU9XQmoweHdVWnFLb3QvL0FnQVpRSE1xYWw1aWJXZ3hrQ0lBZEN4RmtDUWoyRElheW1ZSmRZVXBUa0lTWlV4RGlCVWppYk9XcG1la1pKV2kyY0JibGwrc2gyOFFFMDV0cmFLaG5oc3d4UVhkZ2NrNWlNVXdiVEpBckpiRWtVUyt0Q0dnaWtQY1BUUXQ3ZmtGSlpuNGVVQk1UTEFxUU5UTVdvUW53bCthQjNKYWltNXhSbXBldGE0b216VnlRbHc2eUV5d0V3YnhRbWdtSnpRWnhCZE4vdE1Ca1M4MUx6OHhMaFhrbkp6RXBOUWNlaUtsbFVDWWZNSVRBQWFSWFVKU1pWd0x6SjFDMFdLOGt2eVFScG9Vck9UOEhKZ0wyT2NNL0FBeTM3Z2FYQWdBQSJ9 -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["PSIS"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["dPSIS"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["dSE"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["pPSIS"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["weight"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"114.7","2":"8.56","3":"0.0","4":"NA","5":"8.7","6":"1","_rn_":"m11.6"},{"1":"531.8","2":"18.95","3":"417.1","4":"9.58","5":"8.3","6":"0","_rn_":"m11.4"}],"options":{"columns":{"min":{},"max":[10],"total":[6]},"rows":{"min":[10],"max":[10],"total":[2]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJlY2lzKCBsaXN0KCBkaWZmX2E9ZGlmZl9hICwgZGlmZl9wPWRpZmZfcCApIClcblxuYGBgIn0= -->
+<pre class="r"><code>precis( list( diff_a=diff_a , diff_p=diff_p ) )
 </code></pre>
-<pre><code>
-&lt;!-- rnb-source-end --&gt;
-
-&lt;!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAxICAgICAgICAgMiAgICAgICAgIDMgICAgICAgICA0IFxuMC4zMzMzMzMzIDAuNTAwMDAwMCAwLjI3Nzc3NzggMC41NTU1NTU2IFxuIn0= --&gt;
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiJ2RhdGEuZnJhbWUnOiAyMDAwIG9icy4gb2YgMiB2YXJpYWJsZXM6XG4ifQ== -->
+<pre><code>&#39;data.frame&#39;: 2000 obs. of 2 variables:</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MiwibmNvbCI6NSwic3VtbWFyeSI6eyJEZXNjcmlwdGlvbiI6WyJkZiBbMiDDlyA1XSJdfX0sInJkZiI6Ikg0c0lBQUFBQUFBQUJndHlpVERtaXVCaVlHQmdabUJoWVdSZ1pnVXlHVmhEUTl4MExSZ1lXSmlBSEVZR0ZnWk9FRjBCVkNRTWtnVmlQaUJtc24vY0tyY2o4SFdyL2NIWElNWWJ1UGc2a0tqY0R2dVdxb2Z1NjBTcTRlSVB3TUpCOXZzZzhuRHhaMUQxUitEcUJVRGlEQXdOSUlzbEhrMXJCS1BtUjlQYXdhajEwYlFtb0FoVVhnNG0zNFNwQkt3S3hSdXNlWW01cWNWUUsxaWhnaXk1cVlsNVVEWlRjUXBNMUZUUFZCV216ZElFd2VITXlDd3V5VTh2U3N4Rk01eXpLTDljRDlrQ0pxZ0VXMHBtV2xwOElncXZBTjFseVRtSnhUQ05NRUd1bE1TU1JMMDBvRldwUU40L05DM3MrUVVsbWZsNVFFMU1vSmhoUTlQTVdJUW1JRkNhQjNKZGltNXlSbWxldHE2aEVabzhjMEZlT3NoU3NCQUU4MEpwSmlRMks4UVpUUCtoMnRsZy9rck5TOC9NUzRYNUp5Y3hLVFVIWm5KS2FobVV5UWNNSkhBWTZSVVVaZWFWd0R3S0ZDM1dLOGt2U1lScDRVck96NEdKZ0wzTzhBOEFwTGFKMDY4Q0FBQT0ifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["mean"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["sd"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["5.5%"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["94.5%"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["histogram"],"name":[5],"type":["chr"],"align":["left"]}],"data":[{"1":"0.61","2":"0.06","3":"0.51","4":"0.71","5":"▁▁▃▇▇▅▂▁","_rn_":"diff_a"},{"1":"0.14","2":"0.01","3":"0.12","4":"0.16","5":"▁▁▂▃▇▇▅▂▁▁","_rn_":"diff_p"}],"options":{"columns":{"min":{},"max":[10],"total":[5]},"rows":{"min":[10],"max":[10],"total":[2]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucm91bmQoIHBnICwgMiApXG5cbmBgYCJ9 -->
+<pre class="r"><code>round( pg , 2 )
 </code></pre>
-<pre><code>    1         2         3         4 </code></pre>
-<p>0.3333333 0.5000000 0.2777778 0.5555556</p>
-<pre><code>
-
-
-&lt;!-- rnb-output-end --&gt;
-
-&lt;!-- rnb-chunk-end --&gt;
-
-
-&lt;!-- rnb-text-begin --&gt;
-
-
-
-&lt;!-- rnb-text-end --&gt;
-
-
-&lt;!-- rnb-chunk-begin --&gt;
-
-
-&lt;!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxubWVhbiggZXhwKHBvc3QkYlssNF0tcG9zdCRiWywyXSkgKVxuXG5gYGBcbmBgYCJ9 --&gt;
-
-```r
-```r
-mean( exp(post$b[,4]-post$b[,2]) )
-</code></pre>
-<pre><code>
-&lt;!-- rnb-source-end --&gt;
-
-&lt;!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuOTMzODcxNFxuIn0= --&gt;
-</code></pre>
-<p>[1] 0.9338714 ```</p>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgIEEgICAgQiAgICBDICAgIEQgICAgRSAgICBGXG5tYWxlICAgMC44OCAwLjk2IDAuMzUgMC41MyAwLjMzIDAuNTJcbmZlbWFsZSAwLjEyIDAuMDQgMC42NSAwLjQ3IDAuNjcgMC40OFxuIn0= -->
+<pre><code>          A    B    C    D    E    F
+male   0.88 0.96 0.35 0.53 0.33 0.52
+female 0.12 0.04 0.65 0.47 0.67 0.48</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNoYXB0ZXIgMTEiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQoNCmBgYHtyIHNldHVwfQ0KcmVxdWlyZSh0aWR5dmVyc2UpDQpyZXF1aXJlKHJldGhpbmtpbmcpDQpyZXF1aXJlKGRhZ2l0dHkpDQpgYGANCg0KYGBge3J9DQpkYXRhKGNoaW1wYW56ZWVzKQ0KZCA8LSBjaGltcGFuemVlcw0KDQpkJHRyZWF0bWVudCA8LSAxICsgZCRwcm9zb2NfbGVmdCArIDIqZCRjb25kaXRpb24NCg0KeHRhYnMoIH4gdHJlYXRtZW50ICsgcHJvc29jX2xlZnQgKyBjb25kaXRpb24gLCBkICkNCg0KbTExLjEgPC0gcXVhcCgNCmFsaXN0KA0KcHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLA0KbG9naXQocCkgPC0gYSAsDQphIH4gZG5vcm0oIDAgLCAxLjUgKQ0KKSAsIGRhdGE9ZCApDQoNCnNldC5zZWVkKDE5OTkpDQpwcmlvciA8LSBleHRyYWN0LnByaW9yKCBtMTEuMSAsIG49MWU0ICkNCg0KcCA8LSBpbnZfbG9naXQoIHByaW9yJGEgKQ0KZGVucyggcCAsIGFkaj0wLjEgKQ0KDQptMTEuMiA8LSBxdWFwKA0KYWxpc3QoDQpwdWxsZWRfbGVmdCB+IGRiaW5vbSggMSAsIHAgKSAsDQpsb2dpdChwKSA8LSBhICsgYlt0cmVhdG1lbnRdICwNCmEgfiBkbm9ybSggMCAsIDEuNSApLA0KYlt0cmVhdG1lbnRdIH4gZG5vcm0oIDAgLCAxMCApDQopICwgZGF0YT1kICkNCnNldC5zZWVkKDE5OTkpDQpwcmlvciA8LSBleHRyYWN0LnByaW9yKCBtMTEuMiAsIG49MWU0ICkNCnAgPC0gc2FwcGx5KCAxOjQgLCBmdW5jdGlvbihrKSBpbnZfbG9naXQoIHByaW9yJGEgKyBwcmlvciRiWyxrXSApICkNCg0KZGVucyggYWJzKCBwWywxXSAtIHBbLDJdICkgLCBhZGo9MC4xICkNCg0KbTExLjMgPC0gcXVhcCgNCmFsaXN0KA0KcHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLA0KbG9naXQocCkgPC0gYSArIGJbdHJlYXRtZW50XSAsDQphIH4gZG5vcm0oIDAgLCAxLjUgKSwNCmJbdHJlYXRtZW50XSB+IGRub3JtKCAwICwgMC41ICkNCikgLCBkYXRhPWQgKQ0Kc2V0LnNlZWQoMTk5OSkNCnByaW9yIDwtIGV4dHJhY3QucHJpb3IoIG0xMS4zICwgbj0xZTQgKQ0KcCA8LSBzYXBwbHkoIDE6NCAsIGZ1bmN0aW9uKGspIGludl9sb2dpdCggcHJpb3IkYSArIHByaW9yJGJbLGtdICkgKQ0KbWVhbiggYWJzKCBwWywxXSAtIHBbLDJdICkgKQ0KZGVucyggYWJzKCBwWywxXSAtIHBbLDJdICkgLCBhZGo9MC4xICkNCg0KYGBgDQoNCmBgYHtyfQ0KIyBwcmlvciB0cmltbWVkIGRhdGEgbGlzdCAxMS4xMA0KZGF0X2xpc3QgPC0gbGlzdCgNCnB1bGxlZF9sZWZ0ID0gZCRwdWxsZWRfbGVmdCwNCmFjdG9yID0gZCRhY3RvciwNCnRyZWF0bWVudCA9IGFzLmludGVnZXIoZCR0cmVhdG1lbnQpICkNCg0KbTExLjQgPC0gdWxhbSgNCmFsaXN0KA0KcHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLA0KbG9naXQocCkgPC0gYVthY3Rvcl0gKyBiW3RyZWF0bWVudF0gLA0KYVthY3Rvcl0gfiBkbm9ybSggMCAsIDEuNSApLA0KYlt0cmVhdG1lbnRdIH4gZG5vcm0oIDAgLCAwLjUgKQ0KKSAsIGRhdGE9ZGF0X2xpc3QgLCBjaGFpbnM9NCAsIGxvZ19saWs9VFJVRSApDQpwcmVjaXMoIG0xMS40ICwgZGVwdGg9MiApDQoNCnBvc3QgPC0gZXh0cmFjdC5zYW1wbGVzKG0xMS40KQ0KcF9sZWZ0IDwtIGludl9sb2dpdCggcG9zdCRhICkNCnBsb3QoIHByZWNpcyggYXMuZGF0YS5mcmFtZShwX2xlZnQpICkgLCB4bGltPWMoMCwxKSApDQoNCmxhYnMgPC0gYygiUi9OIiwiTC9OIiwiUi9QIiwiTC9QIikNCnBsb3QoIHByZWNpcyggbTExLjQgLCBkZXB0aD0yICwgcGFycz0iYiIgKSAsIGxhYmVscz1sYWJzICkNCg0KZGlmZnMgPC0gbGlzdCgNCmRiMTMgPSBwb3N0JGJbLDFdIC0gcG9zdCRiWywzXSwNCmRiMjQgPSBwb3N0JGJbLDJdIC0gcG9zdCRiWyw0XSApDQpwbG90KCBwcmVjaXMoZGlmZnMpICkNCg0KcGwgPC0gYnkoIGQkcHVsbGVkX2xlZnQgLCBsaXN0KCBkJGFjdG9yICwgZCR0cmVhdG1lbnQgKSAsIG1lYW4gKQ0KcGxbMSxdDQoNCmRhdCA8LSBsaXN0KCBhY3Rvcj1yZXAoMTo3LGVhY2g9NCkgLCB0cmVhdG1lbnQ9cmVwKDE6NCx0aW1lcz03KSApDQpwX3Bvc3QgPC0gbGluayggbTExLjQgLCBkYXRhPWRhdCApDQpwX211IDwtIGFwcGx5KCBwX3Bvc3QgLCAyICwgbWVhbiApDQpwX2NpIDwtIGFwcGx5KCBwX3Bvc3QgLCAyICwgUEkgKQ0KYGBgDQoNCmBgYHtyfQ0KZCRzaWRlIDwtIGQkcHJvc29jX2xlZnQgKyAxICMgcmlnaHQgMSwgbGVmdCAyDQpkJGNvbmQgPC0gZCRjb25kaXRpb24gKyAxICMgbm8gcGFydG5lciAxLCBwYXJ0bmVyIDINCg0KZGF0X2xpc3QyIDwtIGxpc3QoDQpwdWxsZWRfbGVmdCA9IGQkcHVsbGVkX2xlZnQsDQphY3RvciA9IGQkYWN0b3IsDQpzaWRlID0gZCRzaWRlLA0KY29uZCA9IGQkY29uZCApDQptMTEuNSA8LSB1bGFtKA0KYWxpc3QoDQpwdWxsZWRfbGVmdCB+IGRiaW5vbSggMSAsIHAgKSAsDQpsb2dpdChwKSA8LSBhW2FjdG9yXSArIGJzW3NpZGVdICsgYmNbY29uZF0gLA0KYVthY3Rvcl0gfiBkbm9ybSggMCAsIDEuNSApLA0KYnNbc2lkZV0gfiBkbm9ybSggMCAsIDAuNSApLA0KYmNbY29uZF0gfiBkbm9ybSggMCAsIDAuNSApDQopICwgZGF0YT1kYXRfbGlzdDIgLCBjaGFpbnM9NCAsIGxvZ19saWs9VFJVRSApDQoNCmNvbXBhcmUoIG0xMS41ICwgbTExLjQgLCBmdW5jPVBTSVMgKQ0KDQpwb3N0IDwtIGV4dHJhY3Quc2FtcGxlcyhtMTEuNCkNCm1lYW4oIGV4cChwb3N0JGJbLDRdLXBvc3QkYlssMl0pICkNCmBgYA0KDQoNCg==</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNoYXB0ZXIgMTEiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQoNCmBgYHtyIHNldHVwfQ0KcmVxdWlyZSh0aWR5dmVyc2UpDQpyZXF1aXJlKHJldGhpbmtpbmcpDQpyZXF1aXJlKGRhZ2l0dHkpDQpsaWJyYXJ5KGNtZHN0YW5yKQ0KYGBgDQoNCmBgYHtyfQ0KZGF0YShjaGltcGFuemVlcykNCmQgPC0gY2hpbXBhbnplZXMNCg0KZCR0cmVhdG1lbnQgPC0gMSArIGQkcHJvc29jX2xlZnQgKyAyKmQkY29uZGl0aW9uDQoNCnh0YWJzKCB+IHRyZWF0bWVudCArIHByb3NvY19sZWZ0ICsgY29uZGl0aW9uICwgZCApDQoNCm0xMS4xIDwtIHF1YXAoDQphbGlzdCgNCnB1bGxlZF9sZWZ0IH4gZGJpbm9tKCAxICwgcCApICwNCmxvZ2l0KHApIDwtIGEgLA0KYSB+IGRub3JtKCAwICwgMS41ICkNCikgLCBkYXRhPWQgKQ0KDQpzZXQuc2VlZCgxOTk5KQ0KcHJpb3IgPC0gZXh0cmFjdC5wcmlvciggbTExLjEgLCBuPTFlNCApDQoNCnAgPC0gaW52X2xvZ2l0KCBwcmlvciRhICkNCmRlbnMoIHAgLCBhZGo9MC4xICkNCg0KbTExLjIgPC0gcXVhcCgNCmFsaXN0KA0KcHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLA0KbG9naXQocCkgPC0gYSArIGJbdHJlYXRtZW50XSAsDQphIH4gZG5vcm0oIDAgLCAxLjUgKSwNCmJbdHJlYXRtZW50XSB+IGRub3JtKCAwICwgMTAgKQ0KKSAsIGRhdGE9ZCApDQpzZXQuc2VlZCgxOTk5KQ0KcHJpb3IgPC0gZXh0cmFjdC5wcmlvciggbTExLjIgLCBuPTFlNCApDQpwIDwtIHNhcHBseSggMTo0ICwgZnVuY3Rpb24oaykgaW52X2xvZ2l0KCBwcmlvciRhICsgcHJpb3IkYlssa10gKSApDQoNCmRlbnMoIGFicyggcFssMV0gLSBwWywyXSApICwgYWRqPTAuMSApDQoNCm0xMS4zIDwtIHF1YXAoDQphbGlzdCgNCnB1bGxlZF9sZWZ0IH4gZGJpbm9tKCAxICwgcCApICwNCmxvZ2l0KHApIDwtIGEgKyBiW3RyZWF0bWVudF0gLA0KYSB+IGRub3JtKCAwICwgMS41ICksDQpiW3RyZWF0bWVudF0gfiBkbm9ybSggMCAsIDAuNSApDQopICwgZGF0YT1kICkNCnNldC5zZWVkKDE5OTkpDQpwcmlvciA8LSBleHRyYWN0LnByaW9yKCBtMTEuMyAsIG49MWU0ICkNCnAgPC0gc2FwcGx5KCAxOjQgLCBmdW5jdGlvbihrKSBpbnZfbG9naXQoIHByaW9yJGEgKyBwcmlvciRiWyxrXSApICkNCm1lYW4oIGFicyggcFssMV0gLSBwWywyXSApICkNCmRlbnMoIGFicyggcFssMV0gLSBwWywyXSApICwgYWRqPTAuMSApDQoNCmBgYA0KDQpgYGB7cn0NCiMgcHJpb3IgdHJpbW1lZCBkYXRhIGxpc3QgMTEuMTANCmRhdF9saXN0IDwtIGxpc3QoDQpwdWxsZWRfbGVmdCA9IGQkcHVsbGVkX2xlZnQsDQphY3RvciA9IGQkYWN0b3IsDQp0cmVhdG1lbnQgPSBhcy5pbnRlZ2VyKGQkdHJlYXRtZW50KSApDQoNCm0xMS40IDwtIHVsYW0oDQphbGlzdCgNCnB1bGxlZF9sZWZ0IH4gZGJpbm9tKCAxICwgcCApICwNCmxvZ2l0KHApIDwtIGFbYWN0b3JdICsgYlt0cmVhdG1lbnRdICwNCmFbYWN0b3JdIH4gZG5vcm0oIDAgLCAxLjUgKSwNCmJbdHJlYXRtZW50XSB+IGRub3JtKCAwICwgMC41ICkNCikgLCBkYXRhPWRhdF9saXN0ICwgY2hhaW5zPTQgLCBsb2dfbGlrPVRSVUUgKQ0KcHJlY2lzKCBtMTEuNCAsIGRlcHRoPTIgKQ0KDQpwb3N0IDwtIGV4dHJhY3Quc2FtcGxlcyhtMTEuNCkNCnBfbGVmdCA8LSBpbnZfbG9naXQoIHBvc3QkYSApDQpwbG90KCBwcmVjaXMoIGFzLmRhdGEuZnJhbWUocF9sZWZ0KSApICwgeGxpbT1jKDAsMSkgKQ0KDQpsYWJzIDwtIGMoIlIvTiIsIkwvTiIsIlIvUCIsIkwvUCIpDQpwbG90KCBwcmVjaXMoIG0xMS40ICwgZGVwdGg9MiAsIHBhcnM9ImIiICkgLCBsYWJlbHM9bGFicyApDQoNCmRpZmZzIDwtIGxpc3QoDQpkYjEzID0gcG9zdCRiWywxXSAtIHBvc3QkYlssM10sDQpkYjI0ID0gcG9zdCRiWywyXSAtIHBvc3QkYlssNF0gKQ0KcGxvdCggcHJlY2lzKGRpZmZzKSApDQoNCnBsIDwtIGJ5KCBkJHB1bGxlZF9sZWZ0ICwgbGlzdCggZCRhY3RvciAsIGQkdHJlYXRtZW50ICkgLCBtZWFuICkNCnBsWzEsXQ0KDQpkYXQgPC0gbGlzdCggYWN0b3I9cmVwKDE6NyxlYWNoPTQpICwgdHJlYXRtZW50PXJlcCgxOjQsdGltZXM9NykgKQ0KcF9wb3N0IDwtIGxpbmsoIG0xMS40ICwgZGF0YT1kYXQgKQ0KcF9tdSA8LSBhcHBseSggcF9wb3N0ICwgMiAsIG1lYW4gKQ0KcF9jaSA8LSBhcHBseSggcF9wb3N0ICwgMiAsIFBJICkNCmBgYA0KDQpgYGB7cn0NCmQkc2lkZSA8LSBkJHByb3NvY19sZWZ0ICsgMSAjIHJpZ2h0IDEsIGxlZnQgMg0KZCRjb25kIDwtIGQkY29uZGl0aW9uICsgMSAjIG5vIHBhcnRuZXIgMSwgcGFydG5lciAyDQoNCmRhdF9saXN0MiA8LSBsaXN0KA0KcHVsbGVkX2xlZnQgPSBkJHB1bGxlZF9sZWZ0LA0KYWN0b3IgPSBkJGFjdG9yLA0Kc2lkZSA9IGQkc2lkZSwNCmNvbmQgPSBkJGNvbmQgKQ0KbTExLjUgPC0gdWxhbSgNCmFsaXN0KA0KcHVsbGVkX2xlZnQgfiBkYmlub20oIDEgLCBwICkgLA0KbG9naXQocCkgPC0gYVthY3Rvcl0gKyBic1tzaWRlXSArIGJjW2NvbmRdICwNCmFbYWN0b3JdIH4gZG5vcm0oIDAgLCAxLjUgKSwNCmJzW3NpZGVdIH4gZG5vcm0oIDAgLCAwLjUgKSwNCmJjW2NvbmRdIH4gZG5vcm0oIDAgLCAwLjUgKQ0KKSAsIGRhdGE9ZGF0X2xpc3QyICwgY2hhaW5zPTQgLCBsb2dfbGlrPVRSVUUgKQ0KDQpjb21wYXJlKCBtMTEuNSAsIG0xMS40ICwgZnVuYz1QU0lTICkNCg0KcG9zdCA8LSBleHRyYWN0LnNhbXBsZXMobTExLjQpDQptZWFuKCBleHAocG9zdCRiWyw0XS1wb3N0JGJbLDJdKSApDQpgYGANCg0KYGBge3J9DQpkYXRhKGNoaW1wYW56ZWVzKQ0KZCA8LSBjaGltcGFuemVlcw0KZCR0cmVhdG1lbnQgPC0gMSArIGQkcHJvc29jX2xlZnQgKyAyKmQkY29uZGl0aW9uDQpkJHNpZGUgPC0gZCRwcm9zb2NfbGVmdCArIDEgIyByaWdodCAxLCBsZWZ0IDINCmQkY29uZCA8LSBkJGNvbmRpdGlvbiArIDEgIyBubyBwYXJ0bmVyIDEsIHBhcnRuZXIgMg0KZF9hZ2dyZWdhdGVkIDwtIGFnZ3JlZ2F0ZSgNCmQkcHVsbGVkX2xlZnQgLA0KbGlzdCggdHJlYXRtZW50PWQkdHJlYXRtZW50ICwgYWN0b3I9ZCRhY3RvciAsDQpzaWRlPWQkc2lkZSAsIGNvbmQ9ZCRjb25kICkgLA0Kc3VtICkNCmNvbG5hbWVzKGRfYWdncmVnYXRlZClbNV0gPC0gImxlZnRfcHVsbHMiDQpzdHIoZF9hZ2dyZWdhdGVkKQ0KYGBgDQoNCmBgYHtyfQ0KZGF0IDwtIHdpdGgoIGRfYWdncmVnYXRlZCAsIGxpc3QoDQpsZWZ0X3B1bGxzID0gbGVmdF9wdWxscywNCnRyZWF0bWVudCA9IHRyZWF0bWVudCwNCmFjdG9yID0gYWN0b3IsDQpzaWRlID0gc2lkZSwNCmNvbmQgPSBjb25kICkgKQ0KbTExLjYgPC0gdWxhbSgNCmFsaXN0KA0KbGVmdF9wdWxscyB+IGRiaW5vbSggMTggLCBwICkgLA0KbG9naXQocCkgPC0gYVthY3Rvcl0gKyBiW3RyZWF0bWVudF0gLA0KYVthY3Rvcl0gfiBkbm9ybSggMCAsIDEuNSApICwNCmJbdHJlYXRtZW50XSB+IGRub3JtKCAwICwgMC41ICkNCikgLCBkYXRhPWRhdCAsIGNoYWlucz00ICwgbG9nX2xpaz1UUlVFICkNCg0KY29tcGFyZSggbTExLjYgLCBtMTEuNCAsIGZ1bmM9UFNJUyApDQpgYGANCg0KYGBge3J9DQpsaWJyYXJ5KHJldGhpbmtpbmcpDQpkYXRhKFVDQmFkbWl0KQ0KZCA8LSBVQ0JhZG1pdA0KZA0KDQpkYXRfbGlzdCA8LSBsaXN0KA0KYWRtaXQgPSBkJGFkbWl0LA0KYXBwbGljYXRpb25zID0gZCRhcHBsaWNhdGlvbnMsDQpnaWQgPSBpZmVsc2UoIGQkYXBwbGljYW50LmdlbmRlcj09Im1hbGUiICwgMSAsIDIgKQ0KKQ0KbTExLjcgPC0gdWxhbSgNCmFsaXN0KA0KYWRtaXQgfiBkYmlub20oIGFwcGxpY2F0aW9ucyAsIHAgKSAsDQpsb2dpdChwKSA8LSBhW2dpZF0gLA0KYVtnaWRdIH4gZG5vcm0oIDAgLCAxLjUgKQ0KKSAsIGRhdGE9ZGF0X2xpc3QgLCBjaGFpbnM9NCApDQpwcmVjaXMoIG0xMS43ICwgZGVwdGg9MiApDQoNCnBvc3QgPC0gZXh0cmFjdC5zYW1wbGVzKG0xMS43KQ0KZGlmZl9hIDwtIHBvc3QkYVssMV0gLSBwb3N0JGFbLDJdDQpkaWZmX3AgPC0gaW52X2xvZ2l0KHBvc3QkYVssMV0pIC0gaW52X2xvZ2l0KHBvc3QkYVssMl0pDQpwcmVjaXMoIGxpc3QoIGRpZmZfYT1kaWZmX2EgLCBkaWZmX3A9ZGlmZl9wICkgKQ0KYGBgDQoNCmBgYHtyfQ0KcG9zdGNoZWNrKCBtMTEuNyApDQojIGRyYXcgbGluZXMgY29ubmVjdGluZyBwb2ludHMgZnJvbSBzYW1lIGRlcHQNCmZvciAoIGkgaW4gMTo2ICkgew0KeCA8LSAxICsgMiooaS0xKQ0KeTEgPC0gZCRhZG1pdFt4XS9kJGFwcGxpY2F0aW9uc1t4XQ0KeTIgPC0gZCRhZG1pdFt4KzFdL2QkYXBwbGljYXRpb25zW3grMV0NCmxpbmVzKCBjKHgseCsxKSAsIGMoeTEseTIpICwgY29sPXJhbmdpMiAsIGx3ZD0yICkNCnRleHQoIHgrMC41ICwgKHkxK3kyKS8yICsgMC4wNSAsIGQkZGVwdFt4XSAsIGNleD0wLjggLCBjb2w9cmFuZ2kyICkNCn0NCg0KZGF0X2xpc3QkZGVwdF9pZCA8LSByZXAoMTo2LGVhY2g9MikNCm0xMS44IDwtIHVsYW0oDQphbGlzdCgNCmFkbWl0IH4gZGJpbm9tKCBhcHBsaWNhdGlvbnMgLCBwICkgLA0KbG9naXQocCkgPC0gYVtnaWRdICsgZGVsdGFbZGVwdF9pZF0gLA0KYVtnaWRdIH4gZG5vcm0oIDAgLCAxLjUgKSAsDQpkZWx0YVtkZXB0X2lkXSB+IGRub3JtKCAwICwgMS41ICkNCikgLCBkYXRhPWRhdF9saXN0ICwgY2hhaW5zPTQgLCBpdGVyPTQwMDAgKQ0KcHJlY2lzKCBtMTEuOCAsIGRlcHRoPTIgKQ0KDQpwb3N0IDwtIGV4dHJhY3Quc2FtcGxlcyhtMTEuOCkNCmRpZmZfYSA8LSBwb3N0JGFbLDFdIC0gcG9zdCRhWywyXQ0KZGlmZl9wIDwtIGludl9sb2dpdChwb3N0JGFbLDFdKSAtIGludl9sb2dpdChwb3N0JGFbLDJdKQ0KcHJlY2lzKCBsaXN0KCBkaWZmX2E9ZGlmZl9hICwgZGlmZl9wPWRpZmZfcCApICkNCg0KcGcgPC0gd2l0aCggZGF0X2xpc3QgLCBzYXBwbHkoIDE6NiAsIGZ1bmN0aW9uKGspDQphcHBsaWNhdGlvbnNbZGVwdF9pZD09a10vc3VtKGFwcGxpY2F0aW9uc1tkZXB0X2lkPT1rXSkgKSApDQpyb3duYW1lcyhwZykgPC0gYygibWFsZSIsImZlbWFsZSIpDQpjb2xuYW1lcyhwZykgPC0gdW5pcXVlKGQkZGVwdCkNCnJvdW5kKCBwZyAsIDIgKQ0KYGBgDQoNCg==</div>
 
 
 
@@ -1954,7 +3476,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("ch10.Rmd");
+  window.initializeSourceEmbed("ch11.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
