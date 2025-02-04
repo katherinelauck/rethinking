@@ -210,5 +210,87 @@ applications[dept_id==k]/sum(applications[dept_id==k]) ) )
 rownames(pg) <- c("male","female")
 colnames(pg) <- unique(d$dept)
 round( pg , 2 )
+
+postcheck(m11.8)
+pairs(m11.8)
+```
+
+```{r}
+library(rethinking)
+data(Kline)
+d <- Kline
+d
+
+d$P <- scale( log(d$population) )
+d$contact_id <- ifelse( d$contact=="high" , 2 , 1 )
+curve( dlnorm( x , 3 , .5 ) , from=0 , to=100 , n=200 )
+```
+
+
+```{r}
+N <- 100
+a <- rnorm( N , 3 , 0.5 )
+b <- rnorm( N , 0 , .2 )
+plot( NULL , xlim=c(-2,2) , ylim=c(0,100) )
+for ( i in 1:N ) curve( exp( a[i] + b[i]*x ) , add=TRUE , col=grau() )
+```
+
+```{r}
+x_seq <- seq( from=log(100) , to=log(200000) , length.out=100 )
+lambda <- sapply( x_seq , function(x) exp( a + b*x ) )
+plot( NULL , xlim=range(x_seq) , ylim=c(0,500) , xlab="log population" ,
+ylab="total tools" )
+for ( i in 1:N ) lines( x_seq , lambda[i,] , col=grau() , lwd=1.5 )
+
+plot( NULL , xlim=range(exp(x_seq)) , ylim=c(0,500) , xlab="population" ,
+ylab="total tools" )
+for ( i in 1:N ) lines( exp(x_seq) , lambda[i,] , col=grau() , lwd=1.5 )
+```
+
+```{r}
+dat <- list(
+T = d$total_tools ,
+P = d$P ,
+cid = d$contact_id )
+# intercept only
+m11.9 <- ulam(
+alist(
+T ~ dpois( lambda ),
+log(lambda) <- a,
+a ~ dnorm(3,0.5)
+), data=dat , chains=4 , log_lik=TRUE )
+# interaction model
+m11.10 <- ulam(
+alist(
+  T ~ dpois( lambda ),
+log(lambda) <- a[cid] + b[cid]*P,
+a[cid] ~ dnorm( 3 , 0.5 ),
+b[cid] ~ dnorm( 0 , 0.2 )
+), data=dat , chains=4 , log_lik=TRUE )
+
+compare( m11.9 , m11.10 , func=PSIS )
+```
+
+
+```{r}
+k <- PSIS( m11.10 , pointwise=TRUE )$k
+plot( dat$P , dat$T , xlab="log population (std)" , ylab="total tools" ,
+col=rangi2 , pch=ifelse( dat$cid==1 , 1 , 16 ) , lwd=2 ,
+ylim=c(0,75) , cex=1+normalize(k) )
+# set up the horizontal axis values to compute predictions at
+ns <- 100
+P_seq <- seq( from=-1.4 , to=3 , length.out=ns )
+# predictions for cid=1 (low contact)
+lambda <- link( m11.10 , data=data.frame( P=P_seq , cid=1 ) )
+lmu <- apply( lambda , 2 , mean )
+lci <- apply( lambda , 2 , PI )
+lines( P_seq , lmu , lty=2 , lwd=1.5 )
+shade( lci , P_seq , xpd=TRUE )
+# predictions for cid=2 (high contact)
+lambda <- link( m11.10 , data=data.frame( P=P_seq , cid=2 ) )
+lmu <- apply( lambda , 2 , mean )
+lci <- apply( lambda , 2 , PI )
+lines( P_seq , lmu , lty=1 , lwd=1.5 )
+shade( lci , P_seq , xpd=TRUE )
 ```
 
