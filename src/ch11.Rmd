@@ -473,7 +473,18 @@ In a disaggregated model, the assumption is that each row of the data is an inde
 
 There is an exponential relationship between predictors and the outcome, so exp(1.7 * predictor). 
 
-### 11M3
+### 11M3 & 4
+For binomial regression, there is an implied upper limit to the counts, making the logit link appropriate because it scales the predictors to probabilities. For Poisson regression, there is no implied or known upper limit for counts, or they can be infinitely large, so imposing an upper limit is no longer appropriate. The log scales to the order of magnitude but does not impose an upper limit of 1.
+
+### 11M5
+
+Using a logit link for the mean of a Poisson generalized linear model would imply that the expected value and the variance of the distribution are the same, and are between 0 and 1. It also would imply that the relationship of the predictors to the outcome is not exactly exponential, because it constrains the outcome scale.
+
+### 11M6
+
+Binomial distribution has maximum entropy when each trial must result in one of two events and the expected value is constant. The Poisson is the same, because it is just a special case of the binomial distribution where the expected value and the variance are the same.
+
+### 11M7
 
 
 
